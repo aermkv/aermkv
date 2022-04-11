@@ -1,4 +1,11 @@
+//tokenData.hash = "0x4adba9f6470c0bce7d16b12c4c795ccf1dd91704616f0eeba2bbe952aae2b012"
 let bV;
+let v;
+let ctx;
+let bS;
+let eS;
+let sV;
+
 const hashPairs = [];
 for (let j = 0; j < 32; j++) {
   hashPairs.push(tokenData.hash.slice(2 + (j * 2), 4 + (j * 2)));
@@ -223,17 +230,22 @@ const randomPalette = function (palettes) {
   const paletteName = keys[floor(map(decPairs[0],0,255,0,keys.length-0.001))];
   return palettes[paletteName];
 };
-let palette;
+let p;
 // SETUP & DRAW
 function w(val) {if (val == null) return width;return width * val;}
 function h(val) {if (val == null) return height;return height * val;}
 //const u = w(0.001)
 function setup() {
   bV = bezierVertex;
+  v = vertex;
+  ctx = drawingContext;
+  bS = beginShape;
+  eS = endShape;
+  sV = sqrt(width/2)
   noiseSeed(seed)
-  palette = randomPalette(palettes)
-  const smallerDimension = windowWidth < windowHeight ? windowWidth : windowHeight;
-  createCanvas(smallerDimension, smallerDimension);
+  p = randomPalette(palettes)
+  const smD = windowWidth < windowHeight ? windowWidth : windowHeight;
+  createCanvas(smD, smD);
 }
 function draw() {
   chooseResult()
@@ -257,7 +269,7 @@ function bg_rect_noR(pal) {
   rectMode(CENTER)
   rect(0,0,w(1),h(1))
 }
-function texturedStroke_RGB(x1, y1, x2, y2, weight, r, g, b, alpha) {
+function tS(x1, y1, x2, y2, weight, r, g, b, alpha) {
   push()
   const relWeight = map(weight, 0, width, 1, 40);
   stroke(r, g, b, alpha)
@@ -272,7 +284,7 @@ function texturedStroke_RGB(x1, y1, x2, y2, weight, r, g, b, alpha) {
   }
   pop()
 }
-function bg_perspective(pal1,pal2,pal3) {
+function bg_p(pal1,pal2,pal3) {
   const x_left_1 = rnd(w(0.05), w(0.15))
   const y_top_1 = rnd(h(0.05), h(0.15))
   const x_right_1 = rnd(w(0.7),w(0.85))
@@ -290,20 +302,20 @@ function bg_perspective(pal1,pal2,pal3) {
     let x = map(i, 0, p_lines, x_left_1, x_right_1)
     let y1 = y_top_1
     let y2 = map(x, x_left_1, x_right_1, y_bottom_1 - shift, y_bottom_1)
-    texturedStroke_RGB(x, y1, x, y2, w(0.005), 255, 238, 237, 90)
+    tS(x, y1, x, y2, w(0.005), 255, 238, 237, 90)
   }
   for (let i = 0; i < p_lines; i++){
     let x = map(i, 0, p_lines, x_left_1 + shift, x_right_1 + shift)
     let y1 = y_top_1 + shift
     let y2 = map(x, x_left_1 + shift, x_right_1 + shift, y_bottom_1, y_bottom_1 + shift)
-    texturedStroke_RGB(x, y1, x, y2, w(0.005), 245, 240, 240, 90)
+    tS(x, y1, x, y2, w(0.005), 245, 240, 240, 90)
   }
   blendMode(BLEND)
   for (let i = 0; i < p_lines*1.5; i++){
     let x = map(i, 0 , p_lines*1.5, x_left_2, x_right_2)
     let y1 = map(x, x_left_2, x_right_2, y_split, y_top_2)
     let y2 = map(x, x_left_2, x_right_2, y_split, h(0.6895))
-    texturedStroke_RGB(x, y1, x + rnd(-w(0.001), w(0.001)), y2, w(0.005), pal1[0], pal1[1], pal1[2], 115)
+    tS(x, y1, x + rnd(-w(0.001), w(0.001)), y2, w(0.005), pal1[0], pal1[1], pal1[2], 115)
   }
   for (let i = 0; i < p_lines*1.5; i++){
     let x = map(i, 0, p_lines*1.5, x_left_2, x_right_2)
@@ -313,19 +325,19 @@ function bg_perspective(pal1,pal2,pal3) {
     }else{
         y2 = map(x, xMid, x_right_2, h(0.80185), h(0.6895))
     }
-    texturedStroke_RGB(x, y1, x + rnd(-w(0.001), w(0.001)), y2, w(0.005), pal2[0], pal2[1], pal2[2], 115)
+    tS(x, y1, x + rnd(-w(0.001), w(0.001)), y2, w(0.005), pal2[0], pal2[1], pal2[2], 115)
   }
   for (let i = 0; i < p_lines; i++){
     let x = map(i, 0, p_lines, x_left_2, xMid)
     let y1 = map(x, x_left_2, xMid, h(0.54595), h(0.80135))
     let y2 = map(x, x_left_2, xMid, y_bottom_2, h(0.80135))
-    texturedStroke_RGB(x, y1, x + rnd(-w(0.001), w(0.001)), y2, w(0.005), pal3[0], pal3[1], pal3[2], 115)
+    tS(x, y1, x + rnd(-w(0.001), w(0.001)), y2, w(0.005), pal3[0], pal3[1], pal3[2], 115)
   }
 }
 function bg_rug() {
-  color_select1 = palette.primary
-  color_select2 = palette.contrast
-  color_select3 = palette.secondary
+  cs1 = p.primary
+  cs2 = p.contrast
+  cs3 = p.secondary
   colorMode(RGB, 255, 255, 255, 255);
   let x_left = w(0.1)
   let x_right = w(0.9)
@@ -342,51 +354,31 @@ function bg_rug() {
     let x = map(i, 0, n_l, x_left, x_right)
     if(x < x_left_m){
       let y_mid = map(x,x_left,x_left_m,y_l_split-y_diff,y_l_split+y_diff)
-      texturedStroke_RGB(x, y_top, x, y_mid, w(0.007), color_select1[0], color_select1[1], color_select1[2], 85)
-      texturedStroke_RGB(x, y_mid, x, y_bottom, w(0.007), color_select2[0], color_select2[1], color_select2[2], 85)
+      tS(x, y_top, x, y_mid, w(0.007), cs1[0], cs1[1], cs1[2], 85)
+      tS(x, y_mid, x, y_bottom, w(0.007), cs2[0], cs2[1], cs2[2], 85)
     }else if(x >= x_left_m && x <= x_right_m){
       let y_mid = map(x,x_left_m,x_right_m,y_l_split+y_diff,y_r_split-y_diff)
-      texturedStroke_RGB(x, y_top, x, y_mid, w(0.007), color_select3[0], color_select3[1], color_select3[2], 85)
-      texturedStroke_RGB(x, y_mid, x, y_bottom, w(0.007), color_select1[0], color_select1[1], color_select1[2], 85)
+      tS(x, y_top, x, y_mid, w(0.007), cs3[0], cs3[1], cs3[2], 85)
+      tS(x, y_mid, x, y_bottom, w(0.007), cs1[0], cs1[1], cs1[2], 85)
     }else{
       let y_mid = map(x,x_right_m,x_right,y_r_split-y_diff,y_r_split+y_diff)
-      texturedStroke_RGB(x, y_top, x, y_mid, w(0.007), color_select2[0], color_select2[1], color_select2[2], 85)
-      texturedStroke_RGB(x, y_mid, x, y_bottom, w(0.007), color_select3[0], color_select3[1], color_select3[2], 85)
+      tS(x, y_top, x, y_mid, w(0.007), cs2[0], cs2[1], cs2[2], 85)
+      tS(x, y_mid, x, y_bottom, w(0.007), cs3[0], cs3[1], cs3[2], 85)
     }
   }
 }
-function brush_line_bg_texture_GS() {
-    let line_color = rnd(0,90)
-    let x1 = rnd(w(0), w(1))
-    let x2 = x1 + rnd(-w(0.24),w(0.25))
-    let y1 = 0
-    let y2 = height
-    let weight = w(0.3) //width of line
-    const relWeight = map(weight, 0, width, 50, 200);
-    for (let i = 0; i < relWeight; i ++){
-      let theta = rnd(TWO_PI);
-      let nx1 = x1 + rnd(weight/2)*cos(theta);
-      let ny1 = y1 + rnd(weight/2)*sin(theta);
-      let nx2 = x2 + rnd(weight/2)*cos(theta);
-      let ny2 = y2 + rnd(weight/2)*sin(theta);
-      noStroke();
-      fill(line_color,200)
-      let lval = rnd(0,w(0.01))
-      ellipse(lerp(nx1, nx2, lval), lerp(ny1, ny2, lval), w(0.001))
-    }
-}
 function dots_texture() {
-  let p = palette.t
+  let pal = p.t
   let xoff = 0
   let inc = .01
   let yoff = 0
   let y_inc = .005
-  let num_dot_cols = 200
-  for (let i = 0; i <= num_dot_cols; i++){
-    let x = map(i, 0, num_dot_cols, w(0), w(1))
-    for (let j = 0; j <= num_dot_cols; j++){
-      let y = map(j, 0, num_dot_cols, h(0), h(1))
-        fill(p[0], p[1],  p[2], 165*noise(yoff))
+  let nc = 200
+  for (let i = 0; i <= nc; i++){
+    let x = map(i, 0, nc, w(0), w(1))
+    for (let j = 0; j <= nc; j++){
+      let y = map(j, 0, nc, h(0), h(1))
+        fill(pal[0], pal[1],  pal[2], 165*noise(yoff))
         ellipse(x + w(.048)*noise(xoff), y + h(.048)*noise(xoff), w(0.001))
         yoff += y_inc
       }
@@ -395,7 +387,7 @@ function dots_texture() {
 }
 function checkerboard() {
   push()
-  let p = palette.t
+  let pal = p.t
   translate(width/2, height/2)
   let rt = [0, HALF_PI, PI, TWO_PI]
   const rt_an = rt[floor(rnd() * rt.length)];;
@@ -408,7 +400,7 @@ function checkerboard() {
   let inc = .01
   for (let i = 0; i < num_cols; i++){
     for (let j = 0; j < num_rows + floor(sin(xoff)*3) + rnd(-10,5); j++){
-      fill(p[0], p[1],  p[2], map(j,0,num_rows,125,1))
+      fill(pal[0], pal[1], pal[2], map(j,0,num_rows,125,1))
       noStroke()
       if (j%2 == 0){
         rect(i*2*size+size - width/2,j*size - height/2,size,size)
@@ -432,13 +424,13 @@ function textured_bg_stripes(pal_1, pal_2) {
     x = map(i, 0, bg_nm_1, -width/2, width/2)
     y1 = y_start + noise(xoff)*(width/60)
     y2 = height/2
-    texturedStroke_RGB(x, y1, x, y2, w(0.025), pal_1[0], pal_1[1], pal_1[2], 10)
+    tS(x, y1, x, y2, w(0.025), pal_1[0], pal_1[1], pal_1[2], 10)
     xoff += inc
   }
   const bg_nm_2 = 900
   for (let i = 0; i < bg_nm_2; i++){
     y = map(i, 0, bg_nm_2, -h(.15), h(.4))
-    texturedStroke_RGB(-w(.5), y, w(.5), y + y_shift, w(.05), pal_2[0], pal_2[1], pal_2[2], 40)
+    tS(-w(.5), y, w(.5), y + y_shift, w(.05), pal_2[0], pal_2[1], pal_2[2], 40)
   }
   pop()
 }
@@ -454,21 +446,11 @@ function painted_rectangle(pal) {
   let n_l = 1000
   for (let i = 0; i < n_l; i++){
     let x = map(i, 0, n_l, xPos1, xPos2)
-    texturedStroke_RGB(x, yPos1, x, yPos2, w(.008), pal[0], pal[1], pal[2], 85)
+    tS(x, yPos1, x, yPos2, w(.008), pal[0], pal[1], pal[2], 85)
   }
   pop()
 }
-function painted_rectangle_overlay(weight, passedPalette, alpha) {
-  push()
-  y_start = rnd(h(0.25), h(0.45))
-  for (let y = y_start; y < height/2; y += h(0.002)){
-    let x1 = -width/2 - w(0.1)
-    let x2 = width/2 + w(0.1)
-    texturedStroke_RGB(x1, y, x2, y, weight, passedPalette[0], passedPalette[1], passedPalette[2], alpha)
-  }
-  pop()
-}
-function plH(weight, passedPalette, alpha) {
+function plH(weight, pal, alpha) {
   push()
   translate(width/2,height/2)
   let xPos1 = -w(.5)
@@ -482,7 +464,7 @@ function plH(weight, passedPalette, alpha) {
     let y = map(i, 0, n_l, yPos1, yPos2)
     let x1 = xPos1
     let x2 = xPos2
-    texturedStroke_RGB(x1, y, x2, y, weight, passedPalette[0], passedPalette[1], passedPalette[2], alpha)
+    tS(x1, y, x2, y, weight, pal[0], pal[1], pal[2], alpha)
   }
   pop()
 }
@@ -502,20 +484,20 @@ function plV(weight, pal, alpha) {
     let y = map(i, 0, n_l, yPos1, yPos2)
     let x1 = 0-l_w*noise(xoff)
     let x2 = x1+l_w
-    texturedStroke_RGB(x1, y, x2, y, weight, pal[0], pal[1], pal[2], alpha)
+    tS(x1, y, x2, y, weight, pal[0], pal[1], pal[2], alpha)
     xoff += inc
   }
   pop()
 }
 function halftone_dots() {
-  let p = palette.t
+  let pal = p.t
   let num_dots = 160
   let cell_size = height/num_dots
   let xoff = 0
   let inc = 10/num_dots
   let default_size = 0.6*cell_size
   noStroke()
-  fill(p[0], p[1], p[2],125)
+  fill(pal[0], pal[1], pal[2],125)
   for (let i = 0; i < num_dots; i++){
     let yoff = 0
     for (let j = 0; j < num_dots; j++){
@@ -529,18 +511,17 @@ function halftone_dots() {
 }
 function crescent(a,x,y,r,pal) {
   push()
-  let rt = radians(a);
   stroke(0);
-  let step = w(0.001);
+  let step = w(0.0015);
   let stroke_color = pal
 
   for (let i = r/2; i < r; i+=step) {
     push();
     translate(x, y);
-    rotate(rt);
+    rotate(radians(a));
     translate(0, -i);
     let l = sqrt(r * r - i * i);
-    texturedStroke_RGB(l, 0, -l, 0, w(0.005), stroke_color[0],stroke_color[1],stroke_color[2],135)
+    tS(l, 0, -l, 0, w(0.007), stroke_color[0],stroke_color[1],stroke_color[2],105)
     //translate(0, 2*i);
     //line(l, 0, -l, 0);
     pop();
@@ -551,31 +532,75 @@ function crescent(a,x,y,r,pal) {
 function jpegArt(x,y,sx,sy) {
   beginContour()
   for (var i = 0; i < 16; i++) {
-    vertex(x+sx*Math.cos(2 * PI * i / 16), y + sy * Math.sin(2 * PI * i / 16) + rnd(-w(.001), w(.001)))
+    v(x+sx*Math.cos(2 * PI * i / 16), y + sy * Math.sin(2 * PI * i / 16) + rnd(-w(.001), w(.001)))
   }
   endContour(CLOSE)
+}
+function p2_shape() {
+  ctx.shadowOffsetX =  0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = 0.6*sV;
+  ctx.shadowColor = 'black';
+  noStroke()
+  fill(p.aux[0],p.aux[1],p.aux[2],165)
+  bS();
+  v(w(0.037),h(0.037))
+  v(w(0.64),h(0.037))
+  v(w(0.64),h(0.048))
+  v(w(0.089),h(0.048))
+  v(w(0.089),h(0.089))
+  v(w(0.048),h(0.089))
+  v(w(0.048),h(0.64))
+  v(w(0.037),h(0.64))
+  v(w(0.037),h(0.037))
+  eS(CLOSE);
+  fill(p.contrast[0],p.contrast[1],p.contrast[2],200)
+  bS();
+  v(w(0.089),h(0.089))
+  v(w(0.106),h(0.089))
+  v(w(0.106),h(0.106))
+  v(w(0.089),h(0.106))
+  eS(CLOSE);
+  //rect(w(0.089),h(0.089),(0.037),h(0.037))
+  screw(w(0.062),h(0.062))
+}
+function p3_l() {
+  bS()
+  v(w(.027),h(.027))
+  v(w(.027),h(.25))
+  v(w(.088),h(.25))
+  v(w(.088),h(.088))
+  v(w(.25),h(.088))
+  v(w(.25),h(.027))
+  eS(CLOSE)
+}
+function squ() {
+  v(0,0)
+  v(0,h(1))
+  v(w(1),h(1))
+  v(w(1),0)
 }
 // PERIMETERS
 function perimeter_general() {
   push()
-  drawingContext.shadowOffsetX =  0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = 10;
-  drawingContext.shadowColor = 'black';
+  ctx.shadowOffsetX =  0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = sV;
+  ctx.shadowColor = 'black';
   noStroke()
-  fill(palette.perim[0],palette.perim[1],palette.perim[2],165)
-  beginShape()
-  vertex(w(.002),h(.002))
-  vertex(w(.002),h(.998))
-  vertex(w(.998),h(.998))
-  vertex(w(.998),h(.002))
+  fill(p.perim[0],p.perim[1],p.perim[2],165)
+  bS()
+  v(w(.002),h(.002))
+  v(w(.002),h(.998))
+  v(w(.998),h(.998))
+  v(w(.998),h(.002))
   beginContour()
-  vertex(w(.023),h(.023))
-  vertex(w(.977),h(.023))
-  vertex(w(.977),h(.977))
-  vertex(w(.023),h(.977))
+  v(w(.023),h(.023))
+  v(w(.977),h(.023))
+  v(w(.977),h(.977))
+  v(w(.023),h(.977))
   endContour(CLOSE)
-  endShape(CLOSE)
+  eS(CLOSE)
   pop()
   screw(w(.013),h(.013))
   screw(w(.013),h(.987))
@@ -585,32 +610,32 @@ function perimeter_general() {
 function perimeter_1() {
   perimeter_general()
   push()
-  drawingContext.shadowOffsetX =  0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = 10;
-  drawingContext.shadowColor = 'black';
+  ctx.shadowOffsetX =  0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = sV;
+  ctx.shadowColor = 'black';
   noStroke()
-  fill(palette.t[0],palette.t[1],palette.t[2],165)
+  fill(p.t[0],p.t[1],p.t[2],165)
   strokeCap(PROJECT);
   strokeJoin(MITER);
-  beginShape();
-  vertex(w(0.028),h(0.028))
-  vertex(w(0.972),h(0.028))
-  vertex(w(0.972),h(0.972))
-  vertex(w(0.028),h(0.972))
+  bS();
+  v(w(0.028),h(0.028))
+  v(w(0.972),h(0.028))
+  v(w(0.972),h(0.972))
+  v(w(0.028),h(0.972))
   beginContour()
-  vertex(w(0.048),h(0.048))
-  vertex(w(0.048),h(0.872))
-  vertex(w(0.128),h(0.872))
-  vertex(w(0.128),h(0.952))
-  vertex(w(0.952),h(0.952))
-  vertex(w(0.952),h(0.128))
-  vertex(w(0.872),h(0.128))
-  vertex(w(0.872),h(0.048))
-  vertex(w(0.128),h(0.048))
-  vertex(w(0.048),h(0.048))
+  v(w(0.048),h(0.048))
+  v(w(0.048),h(0.872))
+  v(w(0.128),h(0.872))
+  v(w(0.128),h(0.952))
+  v(w(0.952),h(0.952))
+  v(w(0.952),h(0.128))
+  v(w(0.872),h(0.128))
+  v(w(0.872),h(0.048))
+  v(w(0.128),h(0.048))
+  v(w(0.048),h(0.048))
   endContour()
-  endShape(CLOSE);
+  eS(CLOSE);
   let s_p = [[w(.04),h(.04)],[w(.96),h(.96)],[w(.04),h(.96)],[w(.96),h(.04)]]
   s_p.forEach(i => screw(i[0],i[1]))
   pop()
@@ -618,32 +643,7 @@ function perimeter_1() {
 function perimeter_2() {
   perimeter_general()
   push()
-  drawingContext.shadowOffsetX =  0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = 10;
-  drawingContext.shadowColor = 'black';
-  noStroke()
-  fill(palette.aux[0],palette.aux[1],palette.aux[2],165)
-  strokeCap(PROJECT);
-  strokeJoin(MITER);
-  beginShape();
-  vertex(w(0.037),h(0.037))
-  vertex(w(0.64),h(0.037))
-  vertex(w(0.64),h(0.048))
-  vertex(w(0.089),h(0.048))
-  vertex(w(0.089),h(0.089))
-  vertex(w(0.048),h(0.089))
-  vertex(w(0.048),h(0.64))
-  vertex(w(0.037),h(0.64))
-  vertex(w(0.037),h(0.037))
-  endShape(CLOSE);
-  fill(palette.contrast[0],palette.contrast[1],palette.contrast[2],200)
-  beginShape();
-  vertex(w(0.089),h(0.089))
-  vertex(w(0.106),h(0.089))
-  vertex(w(0.106),h(0.106))
-  vertex(w(0.089),h(0.106))
-  endShape(CLOSE);
+  p2_shape()
   //rect(w(0.089),h(0.089),(0.037),h(0.037))
   screw(w(0.062),h(0.062))
   pop()
@@ -652,57 +652,122 @@ function perimeter_3() {
   perimeter_general()
   push()
   rectMode(CORNER)
-  drawingContext.shadowOffsetX =  0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = 10;
-  drawingContext.shadowColor = 'black';
+  ctx.shadowOffsetX =  0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = 1.2*sV;
+  ctx.shadowColor = 'black';
   noStroke()
-  fill(palette.primary[0],palette.primary[1],palette.primary[2],185)
-  /*beginShape()
-  vertex(w(.027),h(.027))
-  vertex(w(.027),h(.973))
-  vertex(w(.973),h(.973))
-  vertex(w(.973),h(.027))
-  beginContour()
-  vertex(w(.15),h(.85))
-  vertex(w(.15),h(.15))
-  vertex(w(.85),h(.15))
-  vertex(w(.85),h(.85))
-  endContour()
-  endShape(CLOSE)*/
+  fill(p.primary[0],p.primary[1],p.primary[2],185)
   rect(w(.027),h(.85),w(.946),h(.123))
-  fill(palette.aux[0],palette.aux[1],palette.aux[2],185)
-  beginShape()
-  vertex(w(.85),h(.848))
-  vertex(w(.973),h(.848))
-  vertex(w(.973),h(.027))
-  vertex(w(.152),h(.027))
-  vertex(w(.152),h(.15))
-  vertex(w(.85),h(.15))
-  endShape(CLOSE)
-  drawingContext.shadowBlur = 0;
+  fill(p.aux[0],p.aux[1],p.aux[2],185)
+  bS()
+  v(w(.85),h(.848))
+  v(w(.973),h(.848))
+  v(w(.973),h(.027))
+  v(w(.152),h(.027))
+  v(w(.152),h(.15))
+  v(w(.85),h(.15))
+  eS(CLOSE)
+  fill(p.light[0],p.light[1],p.light[2],45)
+  bS()
+  v(w(.027),h(.027))
+  v(w(.027),h(.848))
+  v(w(.148),h(.848))
+  v(w(.148),h(.027))
+  eS(CLOSE)
+  ctx.shadowBlur = 0;
   var color_c1 = gradient_1
   var color_c2 = gradient_2
-  var b1 = color(color_c1[0], color_c1[1], color_c1[2], 255)
-  var b2 = color(color_c2[0], color_c2[1], color_c2[2], 255)
+  var b1 = color(color_c1[0], color_c1[1], color_c1[2], 215)
+  var b2 = color(color_c2[0], color_c2[1], color_c2[2], 25)
   let nlp = 1000
   let ymid = rnd(h(.3),h(.65))
   for (let i = 0; i < nlp; i++){
-    let y = map(i, 0, nlp, h(.027),h(.846))
-    let x1 = w(.027)
-    let x2 = w(.146)
+    let y = map(i, 0, nlp, h(.027),h(.848))
+    let x1 = w(.028)
+    let x2 = w(.148)
     if (y <= ymid){
       let inter = map(y, h(.027), ymid, 1, 0)
       c = lerpColor(b1, b2, inter)
       stroke(c) // MAIN STROKE
     }else{
-      let inter2 = map(y, ymid, h(.844), 1, 0)
+      let inter2 = map(y, ymid, h(.848), 1, 0)
       let c2 = lerpColor(b2, b1, inter2)
       stroke(c2) // OVERLAY STROKE
     }
     strokeWeight(w(0.0015))
     line(x1, y, x2, y)
   }
+  push()
+  translate(w(0),h(1))
+  rotate(270)
+  p2_shape()
+  pop()
+  translate(-w(.025),-h(.025))
+  ctx.shadowBlur = 0.8*sV;
+  noStroke()
+  fill(p.accent[0],p.accent[1],p.accent[2],125)
+  p3_l()
+  ctx.shadowOffsetX =  0.8*sV;
+  ctx.shadowOffsetY = 0.25*sV;
+  ctx.shadowBlur = 0.25*sV;
+  p3_l()
+  translate(w(1.025),h(1.025))
+  rotate(180)
+  scale(1.35)
+  ctx.shadowOffsetX =  -0.25*sV;
+  ctx.shadowOffsetY = -0.25*sV;
+  ctx.shadowBlur = 0.8*sV;
+  noStroke()
+  fill(p.o[0],p.o[1],p.o[2],125)
+  p3_l()
+  ctx.shadowOffsetX =  0.3*sV
+  ctx.shadowOffsetY = 0.3*sV;
+  ctx.shadowBlur = 0.3*sV;
+  p3_l()
+  pop()
+  let s_p = [[w(.027),h(.027)],[w(.027),h(.195)],[w(.195),h(.027)],[w(.96),h(.04)],[w(.86),h(.14)],[w(.162),h(.14)],[w(.92),h(.92)],[w(.92),h(.7)],[w(.7),h(.92)],[w(.134),h(.835)]]
+  s_p.forEach(i => screw(i[0],i[1]))
+}
+function perimeter_4() {
+  push()
+  ctx.shadowOffsetX =  0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = 2*sV;
+  ctx.shadowColor = 'black';
+  noStroke()
+  fill(p.t[0],p.t[1],p.t[2],155)
+  bS()
+  squ()
+  beginContour()
+  v(w(.09),h(.09))
+  v(w(.91),h(.09))
+  v(w(.91),h(.91))
+  v(w(.09),h(.91))
+  endContour()
+  eS(CLOSE)
+  fill(p.o[0],p.o[1],p.o[2],155)
+  bS()
+  squ()
+  beginContour()
+  v(w(.06),h(.06))
+  v(w(.94),h(.06))
+  v(w(.94),h(.94))
+  v(w(.06),h(.94))
+  endContour()
+  eS(CLOSE)
+  fill(p.aux[0],p.aux[1],p.aux[2],155)
+  bS()
+  squ()
+  beginContour()
+  v(w(.03),h(.03))
+  v(w(.97),h(.03))
+  v(w(.97),h(.97))
+  v(w(.03),h(.97))
+  endContour()
+  eS(CLOSE)
+  let s_p = [[w(.046),h(.046)],[w(.046),h(.954)],[w(.954),h(.954)],[w(.954),h(.046)]]
+  s_p.forEach(i => screw(i[0],i[1]))
   pop()
 }
 // CHOOSER FUNCTIONS
@@ -716,78 +781,79 @@ function chooseKellyOverlay() {
 }
 
 // ASSEMBLY FUNCTIONS
-function lines_vert_for_line_structure(x, line_width, weight, passed_palette, alpha) {
+function lv_ln(x, line_width, weight, pal, alpha) {
   push()
-  colorMode(RGB, 255, 255, 255, 255);
-  for (let i = 0; i < height; i += w(0.002)){
-    var y = i - height/2
-    var x1 = x - line_width/2
-    var x2 = x + line_width/2
-    texturedStroke_RGB(x1, y, x2, y, weight, passed_palette[0], passed_palette[1], passed_palette[2], alpha)
+  let lv_nl = 550
+  for (let i = 0; i < lv_nl; i++){
+    let y = map(i, 0, lv_nl, -h(.5), h(.5))
+    let x1 = x - line_width/2
+    let x2 = x + line_width/2
+    tS(x1, y, x2, y, weight, pal[0], pal[1], pal[2], alpha)
   }
   pop()
 }
-function lines_horiz_for_line_structure(y, line_width, weight, passed_palette, alpha) {
+function lh_ln(y, line_width, weight, pal, alpha) {
   push()
-  colorMode(RGB, 255, 255, 255, 255);
-  for (let i = 0; i < height; i += h(0.002)){
-    var x = i - height/2
-    var y1 = y - line_width/2
-    var y2 = y + line_width/2
-    texturedStroke_RGB(x, y1, x, y2, weight, passed_palette[0], passed_palette[1], passed_palette[2], alpha)
+  let lh_nl = 550
+  for (let i = 0; i < lh_nl; i++){
+    let x = map(i, 0, lh_nl, -w(.5), w(.5))
+    let y1 = y - line_width/2
+    let y2 = y + line_width/2
+    tS(x, y1, x, y2, weight, pal[0], pal[1], pal[2], alpha)
   }
   pop()
 }
-function triangle_horizLines(passed_palette, alpha, y_limits) {
-  var inc = .01;
-  xoff = 0 
-  var noise_coeff = w(0.0015)
-  for (let y = y_limits[0]; y < y_limits[1] + w(0.003); y += w(0.002)){
-    var x_left = map(y, y_limits[0], y_limits[1] - w(0.002), 0, -width/2) + noise(xoff)*noise_coeff - w(0.002)
-    var x_right = map(y, y_limits[0], y_limits[1] + w(0.002), 0, width/2) + noise(xoff)*noise_coeff + w(0.002)
-    texturedStroke_RGB(x_left, y, x_right, y, w(0.003), passed_palette[0], passed_palette[1], passed_palette[2], alpha)
+function tr_hL(pal, alpha, y_limits) {
+  let inc = .01;
+  let xoff = 0 
+  let hL_nl = 600
+  for (let i = 0; i <= hL_nl; i++){
+    let y = map(i, 0, hL_nl, y_limits[0], y_limits[1] + w(0.003))
+    let x_left = map(y, y_limits[0], y_limits[1] - w(0.002), 0, -w(.5))
+    let x_right = map(y, y_limits[0], y_limits[1] + w(0.002), 0, w(.5))
+    tS(x_left - w(0.01)*noise(xoff), y, x_right + w(0.01)*noise(xoff), y, w(0.003), pal[0], pal[1], pal[2], alpha)
     xoff += inc
   }
 }
-function triangle_vertLines(passed_palette, alpha, y_limits) {
-  var inc = .01;
-  xoff = 0 
-  var noise_coeff = w(0.0035)
-  for (let x = -width/2; x < 0; x += w(0.001)){
-    var y = map(x, -width/2, 0, y_limits[1], y_limits[0])
-    texturedStroke_RGB(x, y - w(.007)*noise(xoff+noise_coeff), x, y_limits[1], w(0.003), passed_palette[0], passed_palette[1], passed_palette[2], alpha)
-    xoff += inc
-  }
-  for (let x = 0; x < width/2; x += w(0.001)){
-    var y = map(x, 0, width/2, y_limits[0], y_limits[1])
-    texturedStroke_RGB(x, y - w(.007)*noise(xoff+noise_coeff), x, y_limits[1], w(0.003), passed_palette[0], passed_palette[1], passed_palette[2], alpha)
+function tr_vL(pal, alpha, y_limits) {
+  let inc = .01;
+  let xoff = 0 
+  let vL_nl = 850
+  for (let i = 0; i <= vL_nl; i++){
+    let x = map(i, 0, vL_nl, -w(.5), w(.5))
+    if(x<0){
+      y = map(x, -w(.5), 0, y_limits[1], y_limits[0])
+    }else{
+      y = map(x, 0, w(.5), y_limits[0], y_limits[1])
+    }
+    tS(x, y - w(.007)*noise(xoff), x, y_limits[1], w(0.005), pal[0], pal[1], pal[2], alpha)
     xoff += inc
   }
 }
-function triangle_line_structure_2(weight, passed_palette, alpha) {
+function triangle_line_structure_2(weight, pal, alpha) {
   push()
   let rotate_options = [0,180]
   rotation_value = rotate_options[floor(rnd() * rotate_options.length)];;
   angleMode(DEGREES)
   rotate(rotation_value)
-  lines_vert_for_line_structure(width/2, w(0.085), weight, passed_palette, alpha/2)
-  lines_vert_for_line_structure(0, w(0.015), weight, passed_palette, alpha)
-  lines_horiz_for_line_structure(h(0.43), w(0.015), weight, passed_palette, alpha)
-  lines_horiz_for_line_structure(h(0.21), w(0.015), weight, passed_palette, alpha)
+  lv_ln(width/2, w(0.085), weight, pal, alpha/2)
+  lv_ln(0, w(0.015), weight, pal, alpha)
+  lh_ln(h(0.43), w(0.015), weight, pal, alpha)
+  lh_ln(h(0.21), w(0.015), weight, pal, alpha)
   pop()
 }
 function kelly_bigB_2() {
   strokeCap(PROJECT);
   strokeJoin(MITER);
-  beginShape();
-  vertex(w(1),h(0.0284));
-  vertex(w(1),h(1));
+  bS();
+  v(w(1),h(0.0284));
+  v(w(1),h(1));
   bV(w(1),h(1),w(0.539),h(1),w(0.508),h(0.666));
   bV(w(0.508),h(0.666),w(0.511),h(0.981),w(0),h(1));
-  vertex(w(0),h(0));
+  v(w(0),h(0));
   bV(w(0),h(0),w(0.394),h(0.0252),w(0.492),h(0.397));
   bV(w(0.492),h(0.397),w(0.502),h(0.0442),w(1),h(0.0284));
-  endShape(CLOSE);
+  eS(CLOSE);
 }
 function kellyTr() {
   push()
@@ -797,16 +863,16 @@ function kellyTr() {
   var y_limits_random = [y_limits_1, y_limits_2]
   const y_limits = y_limits_random[floor(rnd() * y_limits_random.length)];
   blendMode(OVERLAY)
-  triangle_horizLines(palette.contrast, 45, y_limits)
+  tr_hL(p.contrast, 45, y_limits)
   pop()
 }
 function screw(x,y) {
   push()
   blendMode(BLEND)
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = w(0.01);
-  drawingContext.shadowColor = 'black';
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = sV;
+  ctx.shadowColor = 'black';
   noStroke()
   fill(215, 215, 215, 255)
   ellipse(x, y, w(0.01))
@@ -815,8 +881,8 @@ function screw(x,y) {
   //ellipse(x, y, w(0.005))
   push()
   fill(95, 95, 95, 255)
-  drawingContext.shadowBlur = w(.003);
-  drawingContext.shadowColor = 'white';
+  ctx.shadowBlur = 0.6*sV;;
+  ctx.shadowColor = 'white';
   translate(x,y)
   rectMode(CENTER)
   angleMode(DEGREES)
@@ -842,7 +908,7 @@ function moholyCircle(x_t,y_t,pal,r,start,stop,step) {
     var y2 = 0.98*r * cos(angle);
     //draw ellipse at every x,y point
     //line(x,y,x2,y2)
-    texturedStroke_RGB(x, y, x2, y2, w(0.003), pal[0], pal[1], pal[2], 35)
+    tS(x, y, x2, y2, w(0.003), pal[0], pal[1], pal[2], 35)
   }
   pop()
 }
@@ -850,104 +916,108 @@ function triCut(pal,alpha) {
   fill(pal[0],pal[1],pal[2],alpha)
   stroke(pal[0],pal[1],pal[2],alpha/2)
   strokeWeight(w(.002))
-  beginShape()
-  vertex(w(.12),h(.12))
-  vertex(w(.38),h(.12))
-  vertex(w(.38),h(.88))
-  vertex(w(.12),h(.88))
+  bS()
+  v(w(.12),h(.12))
+  v(w(.38),h(.12))
+  v(w(.38),h(.88))
+  v(w(.12),h(.88))
   beginContour()
-  vertex(w(.08),h(.24))
-  vertex(w(.25),h(.76))
-  vertex(w(.42),h(.24))
+  v(w(.08),h(.24))
+  v(w(.25),h(.76))
+  v(w(.42),h(.24))
   endContour()
-  endShape(CLOSE)
+  eS(CLOSE)
 }
 function triRect(pal,alpha) {
   fill(pal[0],pal[1],pal[2],alpha)
   stroke(pal[0],pal[1],pal[2],alpha/2)
   strokeWeight(w(.002))
-  beginShape()
-  vertex(w(.003),h(.003))
-  vertex(w(.003),h(.997))
-  vertex(w(.497),h(.997))
-  vertex(w(.497),h(.003))
+  bS()
+  v(w(.003),h(.003))
+  v(w(.003),h(.997))
+  v(w(.497),h(.997))
+  v(w(.497),h(.003))
   beginContour()
-  vertex(w(.12),h(.12))
-  vertex(w(.38),h(.12))
-  vertex(w(.38),h(.24))
-  vertex(w(.42),h(.24))
-  vertex(w(.38),h(.36235))
-  vertex(w(.38),h(.88))
-  vertex(w(.12),h(.88))
-  vertex(w(.12),h(.36235))
-  vertex(w(.08),h(.24))
-  vertex(w(.12),h(.24))
+  v(w(.12),h(.12))
+  v(w(.38),h(.12))
+  v(w(.38),h(.24))
+  v(w(.42),h(.24))
+  v(w(.38),h(.36235))
+  v(w(.38),h(.88))
+  v(w(.12),h(.88))
+  v(w(.12),h(.36235))
+  v(w(.08),h(.24))
+  v(w(.12),h(.24))
   endContour()
-  endShape(CLOSE)
+  eS(CLOSE)
 }
 function bShape(pal,a,alpha) {
   fill(pal[0],pal[1],pal[2], alpha)
   let xoff = 0
-  let inc = .09
+  let inc = .03
   strokeCap(PROJECT);
   strokeJoin(MITER);
-  beginShape();
-  //vertex(w(0.353) + a,h(0.003));
-  //vertex(w(0.353)+ a,h(0.997));
-  for (var y = h(0.003); y < h(0.997); y += h(0.003)){
-      var x = w(0.353) + a + w(0.024)*noise(xoff)
-      vertex(x, y)
+  let jw = w(.35)
+  let jy = h(.2)
+  let jpegs = [[jw,jy,w(.003),h(.005)],[jw*(1.21),jy*(1.15),w(.004),h(.007)],[jw*(.98),jy*(1.16),w(.003),h(.005)],[jw*(.95),jy*(.8),w(.002),h(.004)],[jw*(.86),jy*(.95),w(.003),h(.007)],[jw*(1.06),jy*(0.8),w(.001),h(.003)],[jw*(.77),jy*(1.2),w(.002),h(.005)],[jw*(1.11),jy*(1.23),w(.003),h(.004)],[jw*(.9),jy*(1.25),w(.003),h(.006)],[jw*(1.12),jy*(1.06),w(.005),h(.008)],[jw*(.9),jy*(1.1),w(.003),h(.004)],[jw*(1.1),jy*(.89),w(.005),h(.006)],[jw*(1.1),jy*(1.12),w(.003),h(.005)],[jw*(1.06),jy*(.94),w(.004),h(.006)]]
+  bS();
+  //v(w(0.353) + a,h(0.003));
+  //v(w(0.353)+ a,h(0.997));
+  for (var y = h(0.003); y <= h(0.997); y += h(0.001)){
+      var x = w(0.269) + a + w(0.024)*noise(xoff)
+      v(x, y)
       xoff += inc
   }
-  vertex(w(0.882)+ a,h(0.997));
-  bV(w(0.882)+ a,h(0.997),w(0.91)+ a,h(0.545),w(0.5)+ a,h(0.49));
-  bV(w(0.5)+ a,h(0.491),w(0.885)+ a,h(0.419),w(.914)+ a,h(0.003));
-  endShape(CLOSE);
-  beginShape()
-  vertex(w(0.13) + a,h(0.003))
-  for (var y = h(0.003); y < h(0.997); y += h(0.003)){
+  v(w(0.67)+ a,h(0.997));
+  bV(w(0.67)+ a,h(0.997),w(0.67)+ a,h(0.545),w(0.38)+ a,h(0.49));
+  bV(w(0.43)+ a,h(0.491),w(0.67)+ a,h(0.419),w(.67)+ a,h(0.003));
+  jpegs.forEach(i => jpegArt(i[0],i[1],i[2],i[3]))
+  eS(CLOSE)
+  bS()
+  v(w(0.13) + a,h(0.003))
+  for (var y = h(0.003); y <= h(0.997); y += h(0.001)){
       var x = w(0.24) + a + w(0.024)*noise(xoff)
-      vertex(x, y)
+      v(x, y)
       xoff += inc
   }
-  vertex(w(0.13) + a,h(0.997))
-  endShape(CLOSE)
+  v(w(0.13) + a,h(0.997))
+  eS(CLOSE)
 }
 // OVERLAY ASSEMBLY FUNCTIONS
-function window_overlay(x_left_outside, x_left_inside, x_right_outside, x_right_inside, y_top, y_inside, y_bottom, passedPalette, shadowBlur, sX, sY) {
+function window_overlay(x_left_outside, x_left_inside, x_right_outside, x_right_inside, y_top, y_inside, y_bottom, pal, shadowBlur, sX, sY) {
   push()
-  drawingContext.shadowOffsetX = sX;
-  drawingContext.shadowOffsetY = sY;
-  drawingContext.shadowBlur = shadowBlur;
-  drawingContext.shadowColor = 'black';
+  ctx.shadowOffsetX = sX;
+  ctx.shadowOffsetY = sY;
+  ctx.shadowBlur = shadowBlur;
+  ctx.shadowColor = 'black';
   //blendMode(BURN)
-  fill(passedPalette[0], passedPalette[1], passedPalette[2], 125)
-  stroke(passedPalette[0], passedPalette[1], passedPalette[2], 65)
+  fill(pal[0], pal[1], pal[2], 125)
+  stroke(pal[0], pal[1], pal[2], 65)
   strokeJoin(ROUND)
   strokeWeight(w(0.0015))
-  beginShape()
-  vertex(x_left_outside, y_top)
-  vertex(x_right_outside - 1, y_top)
-  vertex(x_right_outside - 1, y_bottom - h(0.003))
-  vertex(x_left_outside, y_bottom - h(0.003))
+  bS()
+  v(x_left_outside, y_top)
+  v(x_right_outside - w(.001), y_top)
+  v(x_right_outside - w(.001), y_bottom - h(0.003))
+  v(x_left_outside, y_bottom - h(0.003))
   beginContour()
-  vertex(x_left_inside, y_bottom - h(0.1))
-  vertex(x_right_inside, y_bottom - h(0.1))
-  vertex(x_right_inside, y_inside)
-  vertex(x_left_inside, y_inside)
+  v(x_left_inside, y_bottom - h(0.1))
+  v(x_right_inside, y_bottom - h(0.1))
+  v(x_right_inside, y_inside)
+  v(x_left_inside, y_inside)
   endContour()
-  endShape(CLOSE)
+  eS(CLOSE)
   let color_c1 = gradient_2
   let b1 = color(color_c1[0], color_c1[1], color_c1[2], 25)
   let b2 = color(255,255,255,215)
   let gradient_mid = rnd(x_left_outside,x_right_outside)
   strokeCap(SQUARE)
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowBlur = 0;
   let n_l = 600
   for (let i = 0; i < n_l; i++){
     let x = map(i, 0, n_l, x_left_outside, x_right_outside)
-    strokeWeight((x_right_outside-x_left_outside)/n_l-w(.0005))
+    strokeWeight((x_right_outside-x_left_outside)/n_l)
     if (x <= gradient_mid){
       let inter = map(x, 0, gradient_mid, 1, 0)
       c = lerpColor(b1, b2, inter)
@@ -974,10 +1044,10 @@ function window_overlay(x_left_outside, x_left_inside, x_right_outside, x_right_
 }
 function rectangle_with_triangleCutout(left, right, bottom, top, pal) {
   push()
-  drawingContext.shadowOffsetX =  - w(0.008);
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = w(0.015);
-  drawingContext.shadowColor = 'black';
+  ctx.shadowOffsetX =  - 0.3*sV;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = sV;
+  ctx.shadowColor = 'black';
   fill(pal[0], pal[1], pal[2], 155)
   stroke(pal[0], pal[1], pal[2], 85)
   strokeJoin(ROUND)
@@ -985,20 +1055,20 @@ function rectangle_with_triangleCutout(left, right, bottom, top, pal) {
   let tri_mid = right - (right - left)/2
   let jw = right - (right-tri_mid)/2
   let jy = bottom/2
-  let jpegs = [[jw,jy*(.08),w(.003),h(.005)],[jw*(1.02),jy*(.1),w(.004),h(.007)],[jw*(.98),jy*(.13),w(.003),h(.005)],[jw*(.95),jy*(.16),w(.002),h(.004)],[jw*(1.03),jy*(.18),w(.003),h(.007)],[jw*(1.06),jy*(.109),w(.001),h(.003)],[jw*(1.09),jy*(.21),w(.002),h(.005)],[jw*(1.11),jy*(.23),w(.003),h(.004)],[jw*(1.08),jy*(.26),w(.003),h(.006)],[jw*(1.12),jy*(.06),w(.005),h(.008)],[jw*(1.08),jy*(.075),w(.003),h(.004)],[jw*(1.1),jy*(.085),w(.005),h(.006)],[jw*(1.1),jy*(.125),w(.003),h(.005)],[jw*(1.16),jy*(.29),w(.004),h(.006)],[jw*(0.94),jy*(.06),w(.004),h(.006)]]//,[jw*(.93),jy*(.16),w(.003),h(.003)],[w(.95),h(.15),w(.001),h(.001)],[w(.86),h(.18),w(.002),h(.005)],[w(.95),h(.21),w(.001),h(.003)],[w(.92),h(.25),w(.003),h(.005)],[w(.9),h(.27),w(.002),h(.003)]
-  beginShape()
-  vertex(left + w(0.003), bottom - h(0.003))
-  vertex(right - w(0.003), bottom - h(0.003))
-  vertex(right - w(0.003), top + h(0.003))
-  vertex(left + w(0.003), top + h(0.003))
+  let jpegs = [[jw,jy*(.08),w(.003),h(.005)],[jw*(1.02),jy*(.1),w(.004),h(.007)],[jw*(.98),jy*(.13),w(.003),h(.005)],[jw*(.95),jy*(.16),w(.002),h(.004)],[jw*(1.03),jy*(.18),w(.003),h(.007)],[jw*(1.06),jy*(.109),w(.001),h(.003)],[jw*(1.09),jy*(.21),w(.002),h(.005)],[jw*(1.11),jy*(.23),w(.003),h(.004)],[jw*(1.08),jy*(.26),w(.003),h(.006)],[jw*(1.12),jy*(.06),w(.005),h(.008)],[jw*(1.08),jy*(.075),w(.003),h(.004)],[jw*(1.1),jy*(.085),w(.005),h(.006)],[jw*(1.1),jy*(.125),w(.003),h(.005)],[jw*(1.06),jy*(.29),w(.004),h(.006)],[jw*(0.94),jy*(.06),w(.004),h(.006)]]
+  bS()
+  v(left + w(0.003), bottom - h(0.003))
+  v(right - w(0.003), bottom - h(0.003))
+  v(right - w(0.003), top + h(0.003))
+  v(left + w(0.003), top + h(0.003))
   beginContour()
-  vertex(tri_mid, top + h(0.05))
-  vertex(right - w(0.05), bottom - h(0.05))
-  vertex(left + w(0.05), bottom - h(0.05))
+  v(tri_mid, top + h(0.05))
+  v(right - w(0.05), bottom - h(0.05))
+  v(left + w(0.05), bottom - h(0.05))
   endContour()
   jpegs.forEach(i => jpegArt(i[0],i[1],i[2],i[3]))
   //jpegArt(w(.85),h(.08),w(.003),h(.005))
-  endShape(CLOSE)
+  eS(CLOSE)
   let color_c1 = gradient_1
   //let color_c2 = gradient_3
   let b1 = color(color_c1[0], color_c1[1], color_c1[2], 0)
@@ -1007,8 +1077,8 @@ function rectangle_with_triangleCutout(left, right, bottom, top, pal) {
   console.log(gradient_mid)
   strokeCap(ROUND)
   blendMode(SCREEN)
-  drawingContext.shadowOffsetX =  0;
-  drawingContext.shadowBlur = 0;
+  ctx.shadowOffsetX =  0;
+  ctx.shadowBlur = 0;
   let tr_num_lines = 1000
   for (let i = 0; i < tr_num_lines; i++){
     let x = map(i, 0, tr_num_lines, left + w(0.003), right - w(0.003))
@@ -1038,26 +1108,28 @@ function rectangle_with_triangleCutout(left, right, bottom, top, pal) {
 function gradient_plate(x_left, x_break, y_top, gradient_width, gradient_height, gradient_height_2, pal1, pal2, pal3) {
   push()
   var color_c1 = gradient_1
-  var color_c2 = gradient_2
+  var color_c2 = gradient_1
   var color_c3 = gradient_3
   var c1 = color(color_c1[0], color_c1[1], color_c1[2], 165)
-  var c2 = color(color_c2[0], color_c2[1], color_c2[2], 165)
-  var c3 = color(color_c3[0], color_c3[1], color_c3[2], 195)
+  var c2 = color(color_c2[0], color_c2[1], color_c2[2], 125)
+  var c3 = color(color_c3[0], color_c3[1], color_c3[2], 215)
   var xoff = 0
-  var inc = .01
-  for (let x = x_left + w(0.003); x <= x_left + gradient_width - w(0.002); x += w(0.0007)){
+  var inc = .02
+  let gp_nl = 800
+  for (let i = 0; i < gp_nl; i++){
+    let x = map(i, 0, gp_nl, x_left + w(0.003),x_left + gradient_width)
     let inter = map(x, x_left, x_left + gradient_width, 0, 1)
     let c = lerpColor(c2, c3, inter)
     push()
     for (var j = 0; j < 25; j++){
       var y = (y_top + h(0.024) + h(0.036)*noise(xoff)) - h(0.00055)*j
-      fill(20, map(j, 5, 23, 45, 0))
+      fill(20, map(j, 2, 20, 30, 0))
       noStroke()
       ellipse(x, y, w(0.001))
     }
     pop()
     strokeCap(ROUND)
-    strokeWeight(w(0.0011))
+    strokeWeight((x_left+gradient_width)/(0.6*gp_nl))
     if (x < x_break - w(0.004)){
       stroke(c)
       line(x, y_top + h(0.024) + w(0.036)*noise(xoff), x, y_top + gradient_height - w(0.004))
@@ -1073,12 +1145,14 @@ function gradient_flat(x_left, y_top, gradient_width, gradient_height, pal1, pal
   push()
   var color_c1 = gradient_2
   var color_c2 = gradient_3
-  var b1 = color(color_c1[0], color_c1[1], color_c1[2], 185)
-  var b2 = color(color_c2[0], color_c2[1], color_c2[2], 90)
+  var b1 = color(color_c1[0], color_c1[1], color_c1[2], 215)
+  var b2 = color(color_c2[0], color_c2[1], color_c2[2], 65)
   var xoff = 0
   var inc = 0.03
   strokeCap(ROUND)
-  for (let x = x_left + w(0.003); x <= x_left + gradient_width - w(0.003); x += w(0.0007)){
+  let gf_nl = 1000
+  for (let i = 0; i < gf_nl; i++){
+    let x = map(i, 0, gf_nl, x_left + w(0.003), x_left + gradient_width - w(0.003))
     for (var j = 0; j < 25; j++){
         let y = (y_top + gradient_height + w(0.025)*noise(xoff)) + h(0.00055)*j
         fill(20, map(j, 5, 23, 45, 0))
@@ -1087,7 +1161,7 @@ function gradient_flat(x_left, y_top, gradient_width, gradient_height, pal1, pal
     if (x <= x_left + w(0.185)){
       let inter = map(x, x_left, x_left + w(0.185), 1, 0)
       c = lerpColor(b1, b2, inter)
-      strokeWeight(w(0.0018))
+      strokeWeight(gradient_width/(0.3*gf_nl))
       stroke(c) // MAIN STROKE
       line(x, y_top + w(0.002), x, y_top + gradient_height + w(0.025)*noise(xoff))
     }else{
@@ -1105,7 +1179,7 @@ function tul(a) {
     push()
     scale(0.85)
     translate(rnd(-w(0.25), w(0.1)), h(0.175))
-    vertex(w(0.49661) + a, h(.998));
+    v(w(0.49661) + a, h(.998));
     bV(w(0.49661) + a, h(.998), w(0.49688) + a, h(0.93156), w(0.49819) + a, h(0.92564));
     bV(w(0.49819) + a, h(0.92564), w(0.49706) + a,h(0.90822), w(0.49557) + a, h(0.89574));
     bV(w(0.49557) + a, h(0.89574), w(0.48579) + a, h(0.81425), w(0.48423) + a, h(0.79959));
@@ -1150,23 +1224,23 @@ function meetingCircles(pal, sx, a, alpha) {
   stroke(pal[0], pal[1], pal[2], alpha/2)
   strokeWeight(w(0.001))
   let sy = h(.002)
-  beginShape();
+  bS();
 
-  vertex(w(0.60115)+sx,h(0.44316)-sy);
-  vertex(w(0)+sx,h(0.44316)-sy);
-  vertex(w(0)+sx,h(0.57023)-sy);
+  v(w(0.60115)+sx,h(0.44316)-sy);
+  v(w(0)+sx,h(0.44316)-sy);
+  v(w(0)+sx,h(0.57023)-sy);
   bV(w(0.04553)+sx,h(0.6971)-sy,w(0.13383)+sx,h(0.75023)-sy,w(0.229)+sx,h(0.76587)-sy);
   bV(w(0.04657)+sx,h(0.77214)-sy,w(0)+sx,h(0.82966)-sy,w(0)+sx,h(0.82966)-sy);
-  vertex(w(0)+sx,h(1)-sy);
-  vertex(w(0.60115)+sx,h(1)-sy);
-  vertex(w(0.60115)+sx,h(0.80545)-sy);
+  v(w(0)+sx,h(1)-sy);
+  v(w(0.60115)+sx,h(1)-sy);
+  v(w(0.60115)+sx,h(0.80545)-sy);
   bV(w(0.502)+sx,h(0.785)-sy,w(0.41848)+sx,h(0.77366)-sy,w(0.34833)+sx,h(0.7686)-sy);
   bV(w(0.48275)+sx,h(0.7556)-sy,w(0.60115)+sx,h(0.69731)-sy,w(0.60115)+sx,h(0.69731)-sy);
-  vertex(w(0.60115)+sx,h(0.44316)-sy);
+  v(w(0.60115)+sx,h(0.44316)-sy);
   beginContour()
   tul(a)
   endContour()
-  endShape()
+  eS()
 
   screw(w(0.012)+sx, h(0.988)-sy)
   screw(w(0.012)+sx, h(0.457)-sy)
@@ -1175,124 +1249,148 @@ function meetingCircles(pal, sx, a, alpha) {
   pop()
 }
 function crescentCutOut() {
-  beginShape();
-  vertex(0,0);
-  vertex(0,h(1));
-  vertex(w(0.55),h(1));
-  vertex(w(0.55),h(0));
+  bS();
+  v(w(.003),h(.003));
+  v(w(.003),h(.997));
+  v(w(0.5),h(.997));
+  v(w(0.5),h(.003));
   beginContour();
-  vertex(w(0.056),h(0.9333));
-  vertex(w(0.056),h(0.08363));
-  bV(w(0.43),h(0.08363),w(0.53),h(0.33644),w(0.53),h(0.50846));
-  bV(w(0.53),h(0.68048),w(0.43),h(0.9333),w(0.056),h(0.9333));
+  v(w(0.056),h(0.9333));
+  v(w(0.056),h(0.08363));
+  bV(w(0.43),h(0.08363),w(0.47),h(0.33644),w(0.47),h(0.50846));
+  bV(w(0.47),h(0.68048),w(0.43),h(0.9333),w(0.056),h(0.9333));
   endContour()
-  endShape();
-  let s_p = [[w(.02),h(.02)],[w(.02),h(.98)],[w(.53),h(.02)],[w(.53),h(.98)]]
+  eS();
+  let s_p = [[w(.02),h(.02)],[w(.02),h(.98)],[w(.47),h(.02)],[w(.47),h(.98)]]
   s_p.forEach(i => screw(i[0],i[1]))
 }
-function twoRectangles() {
-  beginShape()
-  vertex(w(.75),h(0.4))
-  vertex(w(1),h(0.4))
-  vertex(w(1),h(1))
-  vertex(w(0.75),h(1))
-  endShape(CLOSE)
-  beginShape()
-  vertex(w(.65),h(0.2))
-  vertex(w(.65),h(.85))
-  vertex(w(.85),h(.85))
-  vertex(w(.85),h(.2))
-  endShape(CLOSE)
-  let s_p = [[w(.77),h(.42)],[w(.77),h(.83)],[w(.83),h(.83)],[w(.83),h(.42)],[w(.98),h(.98)],[w(.77),h(.98)],[w(.98),h(.42)],[w(.67),h(.22)],[w(.67),h(.83)],[w(.83),h(.22)]]
+function twoRectangles(pal,al1,al2) {
+  ctx.shadowOffsetX = 0.2*sV;
+  ctx.shadowOffsetY = 0.2*sV;
+  ctx.shadowBlur = sV;
+  ctx.shadowColor = 'black';
+  fill(pal[0],pal[1],pal[2],al2)
+  noStroke()
+  fill(pal[0],pal[1],pal[2],al1)
+  bS()
+  v(w(.75),h(0.4))
+  v(w(.997),h(0.4))
+  v(w(.997),h(.997))
+  v(w(0.75),h(.997))
+  eS(CLOSE)
+  bS()
+  v(w(.65),h(0.2))
+  v(w(.65),h(.85))
+  v(w(.85),h(.85))
+  v(w(.85),h(.2))
+  eS(CLOSE)
+  ctx.shadowOffsetX = -0.5*sV;
+  ctx.shadowOffsetY = -0.5*sV;
+  ctx.shadowBlur = 2*sV;
+  ctx.shadowColor = 'black';
+  fill(pal[0],pal[1],pal[2],al2)
+  let jw = w(.925)
+  let jy = h(.75)
+  let jpegs = [[jw,jy*(.8),w(.003),h(.005)],[jw*(1.02),jy*(.9),w(.004),h(.007)],[jw*(.98),jy*(.93),w(.003),h(.005)],[jw*(.95),jy*(.96),w(.002),h(.004)],[jw*(1.03),jy*(.98),w(.003),h(.007)],[jw*(1.06),jy*(.97),w(.001),h(.003)],[jw*(1.05),jy*(1.2),w(.002),h(.005)],[jw*(1.04),jy*(1.23),w(.003),h(.004)],[jw*(1.06),jy*(1.06),w(.004),h(.009)],[jw*(1.04),jy*(.92),w(.006),h(.01)],[jw*(1.04),jy*(.89),w(.002),h(.003)]]
+  bS()
+  v(w(.85),h(0.5))
+  v(w(.85),h(.85))
+  v(w(.75),h(.85))
+  v(w(.75),h(.997))
+  v(w(.997),h(.997))
+  v(w(.997),h(.5))
+  jpegs.forEach(i => jpegArt(i[0],i[1],i[2],i[3]))
+  eS(CLOSE)
+  let s_p = [[w(.77),h(.42)],[w(.77),h(.83)],[w(.83),h(.83)],[w(.83),h(.42)],[w(.98),h(.98)],[w(.77),h(.98)],[w(.98),h(.42)],[w(.67),h(.22)],[w(.67),h(.83)],[w(.83),h(.22)],[w(.87),h(.52)],[w(.98),h(.52)]]
   s_p.forEach(i => screw(i[0],i[1]))
 }
 function bigCurve(pal1,pal2,alpha) {
   noStroke()
   fill(pal1[0],pal1[1],pal1[2],alpha)
-  beginShape();
-  vertex(w(0.002),h(0.002));
-  vertex(w(0.91979),h(0.002));
-  vertex(w(0.91979),h(0.18465));
+  bS();
+  v(w(0.002),h(0.002));
+  v(w(0.91979),h(0.002));
+  v(w(0.91979),h(0.18465));
   bV(w(0.78571),h(0.18465),w(0.09933),h(0.215),w(0.09783),h(0.54487));
-  vertex(w(0.09783),h(0.54487));
-  vertex(w(0.09783),h(0.998));
-  vertex(w(0.002),h(0.998));
+  v(w(0.09783),h(0.54487));
+  v(w(0.09783),h(0.998));
+  v(w(0.002),h(0.998));
   beginContour()
-  vertex(w(0.62975),h(0.07873));
+  v(w(0.62975),h(0.07873));
   bV(w(0.561),h(0.07873),w(0.50543),h(0.10962),w(0.50543),h(0.14658));
-  vertex(w(0.50543),h(0.80547));
+  v(w(0.50543),h(0.80547));
   bV(w(0.50543),h(0.84147),w(0.56133),h(0.87332),w(0.63),h(0.87332));
   bV(w(0.69883),h(0.87332),w(0.7544),h(0.84243),w(0.7544),h(0.80547));
-  vertex(w(0.7544),h(0.14658));
+  v(w(0.7544),h(0.14658));
   bV(w(0.7544),h(0.1106),w(0.6985),h(0.07873),w(0.62975),h(0.07873));
   endContour(CLOSE)
-  endShape(CLOSE);
+  eS(CLOSE);
   fill(pal2[0],pal2[1],pal2[2],alpha)
-  beginShape()
-  vertex(w(0.924),h(0.002))
-  vertex(w(0.998),h(0.002))
-  vertex(w(0.998),h(0.998))
-  vertex(w(0.1),h(0.998))
-  vertex(w(0.1),h(0.968))
-  vertex(w(0.924),h(0.968))
-  endShape(CLOSE)
+  bS()
+  v(w(0.924),h(0.002))
+  v(w(0.998),h(0.002))
+  v(w(0.998),h(0.998))
+  v(w(0.1),h(0.998))
+  v(w(0.1),h(0.968))
+  v(w(0.924),h(0.968))
+  eS(CLOSE)
   screw(w(0.048), h(0.048))
   screw(w(0.048), h(0.952))
 }
 function sailShape() {
   noStroke()
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = w(0.01);
-  drawingContext.shadowColor = 'black';
-  let sail_color = palette.aux
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = sV;
+  ctx.shadowColor = 'black';
+  let sail_color = p.aux
   const sail_width = w(0.5)
   let sail_bottom_split = sail_width+sail_width/3
   let sail_bottom_split_2 = sail_width+sail_width/2
   fill(sail_color[0],sail_color[1],sail_color[2],120)
-  beginShape()
-  vertex(w(0.998),h(.998))
-  vertex(w(0.97),h(.998))
-  vertex(w(0.97),h(.8))
-  vertex(sail_bottom_split_2,h(.998))
-  vertex(sail_bottom_split,h(.998))
-  vertex(sail_width,h(0.8))
-  vertex(sail_width,h(0.6))
-  vertex(w(0.97),h(0.1))
-  vertex(w(0.97),h(0.002))
-  vertex(w(0.998),h(0.002))
-  endShape(CLOSE)
-  drawingContext.shadowBlur = 0;
+  bS()
+  v(w(0.997),h(.997))
+  v(w(0.97),h(.997))
+  v(w(0.97),h(.8))
+  v(sail_bottom_split_2,h(.997))
+  v(sail_bottom_split,h(.997))
+  v(sail_width,h(0.8))
+  v(sail_width,h(0.6))
+  v(w(0.97),h(0.1))
+  v(w(0.97),h(0.003))
+  v(w(0.997),h(0.003))
+  eS(CLOSE)
+  ctx.shadowBlur = 0;
   let color_c1_sail = gradient_3;
   let b1_sail = color(color_c1_sail[0], color_c1_sail[1], color_c1_sail[2], 10);
   let b2_sail = color(255,255,255,125);
-  const gradient_mid_sail = rnd(sail_width,w(0.998))
+  const gradient_mid_sail = rnd(sail_width+w(.05),sail_width+sail_width/2)
   let sail_num_lines = 400
 
   for (let i = 0; i < sail_num_lines; i++){
-    let x = map(i, 0, sail_num_lines, sail_width, w(0.998))
+    let x = map(i, 0, sail_num_lines, sail_width, w(0.997))
     if (x <= gradient_mid_sail){
         let inter = map(x, sail_width, gradient_mid_sail, 1, 0)
         c = lerpColor(b1_sail, b2_sail, inter)
       }else{
-        let inter2 = map(x, gradient_mid_sail, w(0.998), 1, 0)
+        let inter2 = map(x, gradient_mid_sail, w(0.997), 1, 0)
         c = lerpColor(b2_sail, b1_sail, inter2)
       }
     if (x < w(0.97)){
         y1 = map(x,sail_width,w(0.97),h(0.6),h(0.1))
         if(x < sail_bottom_split){
-          y2 = map(x,sail_width,sail_bottom_split,h(0.8),h(.998))
+          y2 = map(x,sail_width,sail_bottom_split,h(0.8),h(.997))
         }else if(x > sail_bottom_split && x < sail_bottom_split_2){
-          y2 = h(.998)
+          y2 = h(.997)
         }else{
-          y2 = map(x,sail_bottom_split_2,w(0.97),h(0.998),h(.8))
+          y2 = map(x,sail_bottom_split_2,w(0.97),h(0.997),h(.8))
         }
     }else{
-        y1 = h(0.002)
-        y2 = h(.998)
+        y1 = h(0.003)
+        y2 = h(.997)
     }
     stroke(c)
-    strokeWeight((w(0.998) - sail_width)/sail_num_lines)
+    strokeWeight((w(0.997) - sail_width)/sail_num_lines)
     line(x,y1,x,y2)
   }
 }
@@ -1304,75 +1402,74 @@ function bigSwoop(pal, pal2) {
   let jw = w(.56)
   let jy = h(.35)
   let jpegs = [[1.2*jw,1.3*jy,w(.003),h(.005)],[1.3*jw,1.5*jy,w(.006),h(.01)],[1.25*jw,1.25*jy,w(.004),h(.009)],[1.22*jw,1.6*jy,w(.003),h(.004)],[1.24*jw,1.65*jy,w(.002),h(.003)]]
-  beginShape()
+  bS()
   //rect(w(0.56),h(0.35),w(.23),h(.648))
-  vertex(w(0.56),h(0.35))
-  vertex(w(0.56),h(0.998))
-  vertex(w(0.79),h(0.998))
-  vertex(w(0.79),h(0.35))
+  v(w(0.56),h(0.35))
+  v(w(0.56),h(0.998))
+  v(w(0.79),h(0.998))
+  v(w(0.79),h(0.35))
   jpegs.forEach(i => jpegArt(i[0],i[1],i[2],i[3]))
-  endShape(CLOSE)
+  eS(CLOSE)
   pop()
   fill(pal2[0],pal2[1],pal2[2], 155)
-  beginShape();
-  vertex(w(.003),h(0.7312));
+  bS();
+  v(w(.003),h(0.7312));
   bV(w(0),h(0.7312),w(0.2082),h(1.11),w(0.6666),h(0.96078));
   bV(w(1.09107),h(0.7812),w(1.02),h(0.3871),w(0.937),h(0.2264));
   bV(w(0.8808),h(0.1246),w(0.80214),h(0.06281),w(0.80214),h(0.0628));
-  vertex(w(0.80214),h(.003));
-  vertex(w(0.76475),h(.003));
-  vertex(w(0.76475),h(0.85641));
+  v(w(0.80214),h(.003));
+  v(w(0.76475),h(.003));
+  v(w(0.76475),h(0.85641));
   bV(w(0.76475),h(0.85641),w(0.359),h(1.15432),w(0.04483),h(0.7312));
   beginContour();
-  vertex(w(0.83194),h(0.13688));
+  v(w(0.83194),h(0.13688));
   bV(w(1.014),h(0.33565),w(1),h(0.64225), w(0.80342),h(0.825));
-  vertex(w(0.80342),h(0.825));
+  v(w(0.80342),h(0.825));
   bV(w(0.81321),h(0.11752),w(0.80342),h(0.10848), w(0.82278),h(0.12688));
   endContour();
-  endShape();
-  /*beginShape();
-  vertex(w(0.59238),h(0.12477));
-  bV(w(0.42761),h(0.12477),w(0.294),h(0.25835),w(0.294),h(0.42313));
-  bV(w(0.294),h(0.58791),w(0.42761),h(0.72149),w(0.59238),h(0.72149));
-  endShape();*/
+  eS();
   angleMode(DEGREES)
   let as = rnd(w(0.43),w(0.72))
-  fill(pal[0],pal[1],pal[2], 155)
-  arc(w(0.65),h(0.45),1.1*as,0.81*as,150,210,OPEN)
+  stroke(pal[0],pal[1],pal[2], 155)
+  strokeWeight(w(.06))
+  strokeCap(PROJECT)
+  noFill()
+  arc(w(0.65),h(0.45),0.95*as,0.95*as,165,270,OPEN)
+  noStroke()
   fill(pal2[0],pal2[1],pal2[2], 155)
   arc(w(0.65),h(0.45),as,as,90,270,OPEN)
   let s_p = [[w(.784),h(.013)],[w(.784),h(.87)],[w(.04),h(.755)],[w(0.65) - 0.05*as,h(0.45) + 0.45*as],[w(0.65) - 0.05*as,h(0.45) - 0.45*as],[w(0.65) - 0.465*as,h(0.42)],[w(0.65) - 0.465*as,h(0.48)],[w(.78),h(.987)],[w(.987),h(.5)]]
   s_p.forEach(i => screw(i[0],i[1]))
 }
 function silo_tr() {
-  beginShape();
-  vertex(w(.38283),h(.12481));
+  bS();
+  v(w(.38283),h(.12481));
   bV(w(.38283),h(.12481),w(.40083),h(.07661),w(.49983),h(.07414));
   bV(w(.59411),h(.07414),w(.61701),h(.12481),w(.61701),h(.12481));
-  endShape();
+  eS();
 
-  beginShape();
-  vertex(w(.37963),h(.54133));
-  vertex(w(.37963),h(.77688));
+  bS();
+  v(w(.37963),h(.54133));
+  v(w(.37963),h(.77688));
   bV(w(.37963),h(.77688),w(.37476),h(.8343),w(.50016),h(.84249));
   bV(w(.61846),h(.84249),w(.62037),h(.77688),w(.62037),h(.77688));
-  vertex(w(.62037),h(.54176));
-  vertex(w(.50016),h(.81344));
-  endShape();
+  v(w(.62037),h(.54176));
+  v(w(.50016),h(.81344));
+  eS();
 
-  beginShape();
-  vertex(w(.38283),h(.12481));
+  bS();
+  v(w(.38283),h(.12481));
   bV(w(.38283),h(.12481),w(.37963),h(.1309),w(.37963),h(.1452));
-  vertex(w(.37963),h(.54133));
-  vertex(w(.19514),h(.12481));
-  endShape();
+  v(w(.37963),h(.54133));
+  v(w(.19514),h(.12481));
+  eS();
 
-  beginShape();
-  vertex(w(.61717),h(.12481));
+  bS();
+  v(w(.61717),h(.12481));
   bV(w(.61717),h(.12481),w(.62037),h(.1309),w(.62037),h(.1452));
-  vertex(w(.62037),h(.54133));
-  vertex(w(.80486),h(.12481));
-  endShape();
+  v(w(.62037),h(.54133));
+  v(w(.80486),h(.12481));
+  eS();
 }
 function siloShapes(pal1,pal2,pal3,alpha) {
   fill(pal1[0],pal1[1],pal1[2],alpha)
@@ -1385,40 +1482,40 @@ function siloShapes(pal1,pal2,pal3,alpha) {
   fill(pal2[0],pal2[1],pal2[2],alpha)
   //stroke(pal2[0],pal2[1],pal2[2],alpha/2)
 
-  beginShape();
-  vertex(w(.003),h(.003));
-  vertex(w(.003),h(.997));
-  vertex(w(.09794),h(.997));
-  vertex(w(.09794),h(.54432));
+  bS();
+  v(w(.003),h(.003));
+  v(w(.003),h(.997));
+  v(w(.09794),h(.997));
+  v(w(.09794),h(.54432));
   bV(w(.09794),h(.54432),w(.09856),h(.411),w(0.27536),h(.30592));
-  vertex(w(.19514),h(.12481));
-  vertex(w(.38283),h(.12481));
+  v(w(.19514),h(.12481));
+  v(w(.38283),h(.12481));
   bV(w(.3953),h(.09605),w(.44289),h(.07414),w(.49983),h(.07414));
   bV(w(.55659),h(.07414),w(.60427),h(.09659),w(.61701),h(.12481));
-  vertex(w(.80486),h(.12481));
-  vertex(w(.77866),h(.184));
-  vertex(w(.78666),h(.18363));
-  vertex(w(.91974),h(.18363));
-  vertex(w(.91974),h(.003));
-  endShape(CLOSE);
+  v(w(.80486),h(.12481));
+  v(w(.77866),h(.184));
+  v(w(.78666),h(.18363));
+  v(w(.91974),h(.18363));
+  v(w(.91974),h(.003));
+  eS(CLOSE);
 
   fill(pal3[0],pal3[1],pal3[2],alpha/2)
   //stroke(pal3[0],pal3[1],pal3[2],alpha/2)
 
-  beginShape();
-  vertex(w(.50015),h(.81344));
-  vertex(w(.37963),h(.54133));
-  vertex(w(.37963),h(.13655));
-  vertex(w(.38283),h(.12481));
-  vertex(w(.61717),h(.12481));
-  vertex(w(.62037),h(.13358));
-  vertex(w(.62037),h(.54133));
-  vertex(w(.50015),h(.81344));
-  endShape();
+  bS();
+  v(w(.50015),h(.81344));
+  v(w(.37963),h(.54133));
+  v(w(.37963),h(.13655));
+  v(w(.38283),h(.12481));
+  v(w(.61717),h(.12481));
+  v(w(.62037),h(.13358));
+  v(w(.62037),h(.54133));
+  v(w(.50015),h(.81344));
+  eS();
 
-  drawingContext.shadowOffsetX = -w(.01);
-  drawingContext.shadowOffsetY = w(.01);
-  drawingContext.shadowBlur = w(.023);
+  ctx.shadowOffsetX = -0.3*sV;
+  ctx.shadowOffsetY = 0.3*sV;
+  ctx.shadowBlur = 2*sV;
   fill(pal1[0],pal1[1],pal1[2],alpha/2)
   noStroke()
   silo_tr()
@@ -1429,26 +1526,26 @@ function siloShapes(pal1,pal2,pal3,alpha) {
 }
 // LOWER LAYER FUNCTIONS
 function rug_layout() {
-  bg_rect(palette.base)
+  bg_rect(p.base)
   translate(-width/2,-height/2)
-  brush_line_bg_texture_GS()
-  brush_line_bg_texture_GS()
+  //brush_line_bg_texture_GS()
+  //brush_line_bg_texture_GS()
   chooseTexture()
   bg_rug()
 }
 function perspective_layout() {
-  bg_rect_noR(palette.base)
+  bg_rect_noR(p.base)
   translate(-width/2,-height/2)
-  brush_line_bg_texture_GS()
-  brush_line_bg_texture_GS()
+  //brush_line_bg_texture_GS()
+  //brush_line_bg_texture_GS()
   chooseTexture()
-  bg_perspective(palette.secondary,palette.primary,palette.accent)
+  bg_p(p.secondary,p.primary,p.accent)
 }
 function triangle_with_lines() {
-  bg_rect(palette.base)
+  bg_rect(p.base)
   translate(-width/2,-height/2)
   push()
-  textured_bg_stripes(palette.secondary, palette.dark)
+  textured_bg_stripes(p.secondary, p.dark)
   chooseTexture()
   translate(width/2, height/2)
   let rt_2 = [0, HALF_PI, PI, TWO_PI]
@@ -1465,45 +1562,42 @@ function triangle_with_lines() {
   const alpha_lines = 125
   push()
   //translate(rnd(-w(0.25),w(0.25)),0)
-  triangle_horizLines(palette.dark, alpha_under, y_limits)
-  triangle_vertLines(palette.primary, alpha_over, y_limits)
+  tr_hL(p.dark, alpha_under, y_limits)
+  tr_vL(p.primary, alpha_over, y_limits)
   //blendMode(OVERLAY)
   var line_functions_linked = [triangle_line_structure_2]
-  line_functions_linked[floor(rnd() * line_functions_linked.length)](w(0.006), palette.accent, alpha_lines);
+  line_functions_linked[floor(rnd() * line_functions_linked.length)](w(0.006), p.accent, alpha_lines);
   pop()
   pop()
 }
 function kellyLayout() {
-  bg_rect(palette.base)
+  bg_rect(p.base)
   translate(-width/2,-height/2)
   let x_left = w(0.15)
   let x_right = rnd(w(0.8),w(0.9))
   let y_top = h(0.1)
   let y_bottom = h(0.9)
-  let bigRectColor = palette.secondary
-  let insideShapeColor = palette.light
-  let innerRectColor = palette.primary
-  let stripeColor = palette.contrast
-  let innerStripeColor = palette.light
+  let bigRectColor = p.secondary
+  let insideShapeColor = p.light
+  let innerRectColor = p.primary
+  let stripeColor = p.contrast
+  let innerStripeColor = p.light
   let x_left_inside = x_left + w(0.03);
   let x_right_inside = x_right - w(0.05);
   let y_top_inside = y_top + h(0.1);
-  let y_bottom_inside = y_bottom - h(0.03);
-  let x_sliver = x_left_inside + rnd(w(0.005),w(0.016));
-  //let x_break = (x_left_inside+x_right_inside)/2
   chooseTexture()
   let nl1 = 1600
   for (let i = 0; i < nl1; i++){
     let x = map(i,0,nl1,x_left,x_right)
-    texturedStroke_RGB(x, y_top, x, y_bottom, w(0.01), bigRectColor[0], bigRectColor[1], bigRectColor[2], 125) 
+    tS(x, y_top, x, y_bottom, w(0.01), bigRectColor[0], bigRectColor[1], bigRectColor[2], 125) 
   }
   let nl2 = 500
   for (let i = 0; i < nl2; i++){
     let x = map(i, 0, nl2, x_left + w(0.1), x_right - w(0.1))
-    texturedStroke_RGB(x, 1.25*y_top_inside, x, h(1), w(0.001), innerRectColor[0], innerRectColor[1], innerRectColor[2], 255)
+    tS(x, 1.25*y_top_inside, x, h(1), w(0.001), innerRectColor[0], innerRectColor[1], innerRectColor[2], 255)
   }
   blendMode(HARD_LIGHT)
-  let fillColor = palette.primary
+  let fillColor = p.primary
   fill(fillColor[0],fillColor[1],fillColor[2],125)
   chooseKellyOverlay()
   blendMode(BLEND)
@@ -1511,78 +1605,67 @@ function kellyLayout() {
   for (let i = 0; i < nl3; i++){
     let x = map(i, 0, nl3, x_left_inside, x_right_inside)
     if(x < x_left + w(0.1)){
-        texturedStroke_RGB(x, y_top_inside - h(0.02), x, 3*y_top_inside, w(0.01), insideShapeColor[0], insideShapeColor[1], insideShapeColor[2], 130)
+        tS(x, y_top_inside - h(0.02), x, 3*y_top_inside, w(0.01), insideShapeColor[0], insideShapeColor[1], insideShapeColor[2], 130)
     }else if(x > x_left + w(0.1) && x < x_right - w(0.1)){
-        texturedStroke_RGB(x, y_top_inside - h(0.02), x, 1.25*y_top_inside, w(0.01), insideShapeColor[0], insideShapeColor[1], insideShapeColor[2], 130)
+        tS(x, y_top_inside - h(0.02), x, 1.25*y_top_inside, w(0.01), insideShapeColor[0], insideShapeColor[1], insideShapeColor[2], 130)
     }else{
-        texturedStroke_RGB(x, y_top_inside - h(0.02), x, 2*y_top_inside, w(0.01), insideShapeColor[0], insideShapeColor[1], insideShapeColor[2], 130)
+        tS(x, y_top_inside - h(0.02), x, 2*y_top_inside, w(0.01), insideShapeColor[0], insideShapeColor[1], insideShapeColor[2], 130)
     }
   }
   let nl4 = 1000
   for (let i = 0; i <= nl4; i++){
     let x = map(i, 0, nl4, 0, x_right)
-    texturedStroke_RGB(x, y_bottom, x, y_bottom + (h(1)-y_bottom)/2, w(0.006), stripeColor[0], stripeColor[1], stripeColor[2], 125)
+    tS(x, y_bottom, x, y_bottom + (h(1)-y_bottom)/2, w(0.006), stripeColor[0], stripeColor[1], stripeColor[2], 125)
   }
   let nl5 = 500
   for (let i = 0; i < nl5; i++){
     let x = map(i, 0, nl5, w(.15), width/2)
-    texturedStroke_RGB(x, y_bottom + w(0.01), x, y_bottom + (h(1)-y_bottom)/2 - w(0.01), w(0.005), innerStripeColor[0], innerStripeColor[1], innerStripeColor[2], 95)
+    tS(x, y_bottom + w(0.01), x, y_bottom + (h(1)-y_bottom)/2 - w(0.01), w(0.005), innerStripeColor[0], innerStripeColor[1], innerStripeColor[2], 95)
   }
   
 
 }
 function basicNewman() {
-  bg_rect(palette.base)
+  bg_rect(p.base)
   translate(-width/2,-height/2)
   chooseTexture()
-  textured_bg_stripes(palette.secondary, palette.contrast)
-  painted_rectangle(palette.primary)
-  plH(w(0.005), palette.aux, 60)
-  //plV(w(0.01), palette.light, 90)
-}
-function newManC() {
-  bg_rect(palette.base)
-  translate(-width/2,-height/2)
-  chooseTexture()
-  textured_bg_stripes(palette.secondary, palette.contrast)
-  painted_rectangle(palette.primary)
-  //circ(w(1),h(.5),w(.6),HALF_PI,PI+HALF_PI,palette.aux,125)
-  c4()
-  plH(w(0.005), palette.aux, 60)
-  //plV(w(0.01), palette.light, 90)
+  textured_bg_stripes(p.secondary, p.contrast)
+  painted_rectangle(p.primary)
+  plH(w(0.005), p.aux, 60)
+  //plV(w(0.01), p.light, 90)
 }
 function basicMoholy() {
   push()
-  bg_rect(palette.base)
+  bg_rect(p.base)
   translate(-width/2,-height/2)
   chooseTexture()
-  brush_line_bg_texture_GS()
-  brush_line_bg_texture_GS()
+  //brush_line_bg_texture_GS()
+  //brush_line_bg_texture_GS()
   let rect_x = rnd(w(0.25),w(0.5))
   let rect_y = rnd(h(0.2),h(0.4))
   let rect_y_inside = rect_y + h(0.1)
   let rect_y_inside_low = rect_y + h(0.35)
   let rect_width = rect_x + (width - rect_x)/4
   let rect_height = rect_y + h(0.5)
-  let rect_color = palette.secondary
+  let rect_color = p.secondary
   noStroke()
-  let circle_color = palette.contrast
+  let circle_color = p.contrast
   fill(circle_color[0],circle_color[1],circle_color[2],255)
   ellipse(rect_x,rect_y_inside,2*(rect_y_inside-rect_y))
   fill(rect_color[0],rect_color[1],rect_color[2],135)
   //rect(rect_x,rect_y,rect_width,rect_height)
-  beginShape()
-  vertex(rect_x,rect_y)
-  vertex(rect_width,rect_y)
-  vertex(rect_width,rect_height)
-  vertex(rect_x,rect_height)
+  bS()
+  v(rect_x,rect_y)
+  v(rect_width,rect_y)
+  v(rect_width,rect_height)
+  v(rect_x,rect_height)
   beginContour()
-  vertex(rect_x-0.05*rect_width, rect_y_inside)
-  vertex(rect_x-0.05*rect_width, rect_y_inside_low)
-  vertex(rect_x+0.05*rect_width, rect_y_inside_low)
-  vertex(rect_x+0.05*rect_width, rect_y_inside)
+  v(rect_x-0.05*rect_width, rect_y_inside)
+  v(rect_x-0.05*rect_width, rect_y_inside_low)
+  v(rect_x+0.05*rect_width, rect_y_inside_low)
+  v(rect_x+0.05*rect_width, rect_y_inside)
   endContour()
-  endShape(CLOSE)
+  eS(CLOSE)
   angleMode(DEGREES)
   let angle_begin = rnd(360,720)
   let angle_diff = rnd(135,270)
@@ -1593,43 +1676,43 @@ function basicMoholy() {
   let second_angle_offset = angle_begin/3
   let wedge_angle_offset = rnd(50,135)
   noFill()
-  let arc_color = palette.light
-  let arc_color_2 = palette.accent
-  let arc_color_3 = palette.secondary
+  let arc_color = p.light
+  let arc_color_2 = p.accent
+  let arc_color_3 = p.secondary
   strokeCap(PROJECT)
   noStroke()
   fill(arc_color_3[0], arc_color_3[1], arc_color_3[2], 190)
   //arc(arc_x, arc_y, 1.12*arc_size, 1.12*arc_size, angle_begin-0.5*second_angle_offset, angle_begin+wedge_angle_offset, OPEN);
-  crescent(angle_begin,arc_x,arc_y,0.57*arc_size,palette.secondary)
+  crescent(angle_begin,arc_x,arc_y,0.57*arc_size,p.secondary)
   noFill()
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = map(arc_size,w(0.32),w(0.8),w(0.001),w(0.004))
-  drawingContext.shadowColor = 'grey';
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = map(arc_size,w(0.32),w(0.8),0.1*sV,0.5*sV)
+  ctx.shadowColor = 'grey';
   strokeWeight(arc_x/20)
   stroke(arc_color_2[0], arc_color_2[1], arc_color_2[2], 235)
   arc(arc_x, arc_y, 1.047*arc_size, 1.047*arc_size, angle_begin-second_angle_offset, angle_end-2*second_angle_offset);
-  drawingContext.shadowBlur = map(arc_size,w(0.32),w(0.8),w(0.0095),w(0.0025))
+  ctx.shadowBlur = map(arc_size,w(0.32),w(0.8),0.05*sV,0.25*sV)
   strokeWeight(arc_x/40)
   stroke(arc_color[0], arc_color[1], arc_color[2], 235)
   arc(arc_x, arc_y, arc_size, arc_size, angle_begin, angle_end);
-  //moholyCircle(arc_x,arc_y,palette.light,arc_size/3,angle_begin,angle_end,0.01)
+  //moholyCircle(arc_x,arc_y,p.light,arc_size/3,angle_begin,angle_end,0.01)
   pop()
 }
 function threeSquares() {
   push()
-  bg_rect(palette.base)
+  bg_rect(p.base)
   translate(-width/2,-height/2)
   chooseTexture()
+  /*brush_line_bg_texture_GS()
   brush_line_bg_texture_GS()
   brush_line_bg_texture_GS()
-  brush_line_bg_texture_GS()
-  brush_line_bg_texture_GS()
+  brush_line_bg_texture_GS()*/
   let x_0 = w(0.02)
   let y_0 = h(0.02)
   let rect_size_1 = rnd(w(0.27),w(0.43))
   let rect_size_2 = 1.5*rect_size_1
-  let rect1_color = palette.contrast
+  let rect1_color = p.contrast
   rectMode(CORNER)
   //fill(rect1_color[0],rect1_color[1],rect1_color[2],135)
   //rect(x_0,y_0,rect_size_1,rect_size_1)
@@ -1638,10 +1721,10 @@ function threeSquares() {
     let x = map(i ,0, num_lines_small, x_0, x_0 + rect_size_1)
     let y1 = y_0
     let y2 = y_0 + rect_size_1
-    texturedStroke_RGB(x, y1, x, y2, w(.004), rect1_color[0],rect1_color[1],rect1_color[2],225)
+    tS(x, y1, x, y2, w(.004), rect1_color[0],rect1_color[1],rect1_color[2],225)
   }
   //noStroke()
-  let rect2_color = palette.secondary
+  let rect2_color = p.secondary
   //fill(rect2_color[0],rect2_color[1],rect2_color[2],135)
   //rect(x_0+rect_size_1/4,y_0+rect_size_1/4,rect_size_2,rect_size_2)
   let num_lines_mid = 500
@@ -1649,9 +1732,9 @@ function threeSquares() {
     let y = map(i ,0, num_lines_mid, y_0+rect_size_1/4,y_0+rect_size_1/4 + rect_size_2)
     let x1 = x_0+rect_size_1/4
     let x2 = x_0+rect_size_1/4 + rect_size_2
-    texturedStroke_RGB(x1, y, x2, y, w(.005), rect2_color[0],rect2_color[1],rect2_color[2],125)
+    tS(x1, y, x2, y, w(.005), rect2_color[0],rect2_color[1],rect2_color[2],125)
 }
-  let rect3_color = palette.primary
+  let rect3_color = p.primary
   //fill(rect3_color[0],rect3_color[1],rect3_color[2],135)
   //rect(x_0+rect_size_1,y_0+rect_size_1,1.3*rect_size_2,1.3*rect_size_2)
   let num_lines_big = 280
@@ -1659,10 +1742,10 @@ function threeSquares() {
     let x = map(i ,0, num_lines_big, x_0+rect_size_1, x_0 + 1.3*rect_size_2)
     let y1 = y_0+rect_size_1
     let y2 = y_0 + 1.3*rect_size_2
-    texturedStroke_RGB(x, y1, x, y2, w(.005), rect3_color[0],rect3_color[1],rect3_color[2],150)
+    tS(x, y1, x, y2, w(.005), rect3_color[0],rect3_color[1],rect3_color[2],150)
   }
-  let line1_color = palette.accent
-  let line2_color = palette.light
+  let line1_color = p.accent
+  let line2_color = p.light
   let x_split = rnd((w(0.4),w(0.75)))
   let num_lines_bar = 600
   for (let i = 0; i < num_lines_bar; i++){
@@ -1670,20 +1753,20 @@ function threeSquares() {
     let y1 = y_0
     let y2 = y_0 + rect_size_1/6
       if(x < x_split){
-      texturedStroke_RGB(x, y1, x, y2, w(0.005), line1_color[0],line1_color[1],line1_color[2],150)
+      tS(x, y1, x, y2, w(0.005), line1_color[0],line1_color[1],line1_color[2],150)
     }else{
-      texturedStroke_RGB(x, y1, x, y2, w(.005), line2_color[0],line2_color[1],line2_color[2],125)
+      tS(x, y1, x, y2, w(.005), line2_color[0],line2_color[1],line2_color[2],125)
     }
   }
   pop()
 }
 function squaresSail() {
   push()
-  bg_rect(palette.base)
+  bg_rect(p.base)
   translate(-width/2,-height/2)
   chooseTexture()
-  brush_line_bg_texture_GS()
-  brush_line_bg_texture_GS()
+  //brush_line_bg_texture_GS()
+  //brush_line_bg_texture_GS()
   let x_left_out = rnd(w(0.1),w(0.2))
   let x_right_out = w(1) - x_left_out
   let y_top_out = rnd(h(0.06),h(0.18))
@@ -1692,24 +1775,24 @@ function squaresSail() {
   let x_right_in = x_right_out - rnd(w(0.05),w(0.1))
   let y_top_in = y_top_out + rnd(w(0.05),w(0.1))
   let y_bottom_in = y_bottom_out - rnd(w(0.05),w(0.1))
-  let color_1 = palette.secondary
-  let color_2 = palette.primary
-  let color_3 = palette.light
-  let color_4 = palette.accent
-  let color_5 = palette.dark
+  let color_1 = p.secondary
+  let color_2 = p.primary
+  let color_3 = p.light
+  let color_4 = p.accent
+  let color_5 = p.dark
   let num_lines_1 = 650
   for (let i = 0; i < num_lines_1; i++){
     let x = map(i, 0, num_lines_1, x_left_out, x_right_out)
     let y1 = y_top_out
     let y2 = y_bottom_out
-    texturedStroke_RGB(x, y1, x, y2, w(.005), color_1[0],color_1[1],color_1[2],125)
+    tS(x, y1, x, y2, w(.005), color_1[0],color_1[1],color_1[2],125)
   }
   let num_lines_2 = 600
   for (let i = 0; i < num_lines_2; i++){
     let x = map(i, 0, num_lines_2, x_left_in, x_right_in)
     let y1 = y_top_in
     let y2 = y_bottom_in
-    texturedStroke_RGB(x, y1, x, y2, w(.005), color_2[0],color_2[1],color_2[2],125)
+    tS(x, y1, x, y2, w(.005), color_2[0],color_2[1],color_2[2],125)
   }
   let sail_x_left = x_left_out
   let sail_x_2 = 1.35*x_left_in 
@@ -1739,7 +1822,7 @@ function squaresSail() {
     }else{
       y2 = sail_y_end
     }
-    texturedStroke_RGB(x, y1, x, y2, w(.005), color_3[0],color_3[1],color_3[2],135)
+    tS(x, y1, x, y2, w(.005), color_3[0],color_3[1],color_3[2],135)
   }
   let num_lines_4 = 800
   for (let i = 0; i < num_lines_4; i++){
@@ -1750,49 +1833,49 @@ function squaresSail() {
     }else{
       x2 = sail_x_4
     }
-    texturedStroke_RGB(x1, y, x2, y, w(.003), color_4[0],color_4[1],color_4[2],125)
+    tS(x1, y, x2, y, w(.003), color_4[0],color_4[1],color_4[2],125)
   }
   let num_lines_5 = 400
   for (let i = 0; i < num_lines_5; i++){
     let x = map(i, 0, num_lines_5, sail_x_4, x_right_out)
     let y1 = y_bottom_out
     let y2 = 1.1*y_bottom_out
-    texturedStroke_RGB(x, y1, x, y2, w(.005), color_5[0],color_5[1],color_5[2],125)
+    tS(x, y1, x, y2, w(.005), color_5[0],color_5[1],color_5[2],125)
   }
   pop()
 }
 function trident() {
-bg_rect(palette.base)
+bg_rect(p.base)
 translate(-width/2,-height/2)
 chooseTexture()
 push()
 let scaleDegree = rnd(0.8,1.04)
-let trident_color = palette.primary
+let trident_color = p.primary
 noStroke()
 fill(trident_color[0],trident_color[1],trident_color[2],185)
-drawingContext.shadowOffsetX =  0;
-drawingContext.shadowOffsetY = 0;
-drawingContext.shadowBlur = map(scaleDegree,0.5,1.1,w(0.0005),w(0.003));
-drawingContext.shadowColor = 'black';
+ctx.shadowOffsetX =  0;
+ctx.shadowOffsetY = 0;
+ctx.shadowBlur = map(scaleDegree,0.5,1.1,0.05*sV,0.3*sV);
+ctx.shadowColor = 'black';
 scale(scaleDegree)
-beginShape();
-vertex(w(0.9417),h(0));
-vertex(w(.8912),h(0));
+bS();
+v(w(0.9417),h(0));
+v(w(.8912),h(0));
 bV(w(.8912),h(0),w(0.8114),h(0.4973),w(0.5088),h(0.5603));
-vertex(w(0.5222),h(0.0597));
-vertex(w(0.4442),h(0.09418));
-vertex(w(0.43393),h(0.56664));
+v(w(0.5222),h(0.0597));
+v(w(0.4442),h(0.09418));
+v(w(0.43393),h(0.56664));
 bV(w(0.123),h(0.55332),w(0.0347),h(0),w(0.0347),h(0));
-vertex(w(0),h(0));
-vertex(w(0),h(0.11));
+v(w(0),h(0));
+v(w(0),h(0.11));
 bV(w(0),h(0.11),w(0.06349),h(0.58058),w(0.43284),h(0.62284));
-vertex(w(0.426),h(0.9509));
-vertex(w(0.5),h(0.8951));
-vertex(w(0.5073),h(0.62257));
-bezierVertex(w(0.82914),h(0.57986),w(0.94169),h(0),w(0.94169),h(0));
-endShape();
+v(w(0.426),h(0.9509));
+v(w(0.5),h(0.8951));
+v(w(0.5073),h(0.62257));
+bV(w(0.82914),h(0.57986),w(0.94169),h(0),w(0.94169),h(0));
+eS();
 pop()
-let shape_color = palette.accent
+let shape_color = p.accent
 let shape_x1 = rnd(w(0.06),w(0.23))
 let shape_x2 = shape_x1 + w(scaleDegree)/5
 let y_max = map(scaleDegree, 0.5, 1.1, h(0.35), h(0.9))
@@ -1801,9 +1884,9 @@ for (let i = 0; i < nlines; i++){
   let x = map(i, 0, nlines, shape_x1, shape_x2)
   let y1 = h(0)
   let y2 = map(x, shape_x1, shape_x2, y_max, y_max - 0.03*y_max)
-  texturedStroke_RGB(x, y1, x - map(y_max,h(0.3),h(0.7),0.06*x,0.032*x), y2, w(0.008), shape_color[0],shape_color[1],shape_color[2], 125)
+  tS(x, y1, x - map(y_max,h(0.3),h(0.7),0.06*x,0.032*x), y2, w(0.008), shape_color[0],shape_color[1],shape_color[2], 125)
 }
-crescent(115, map(scaleDegree, 0.5, 1.1, w(0.35), w(0.5)), map(scaleDegree, 0.5, 1.1, h(0.35), h(0.5)), map(scaleDegree, 0.5, 1.1, h(0.28), h(0.5)), palette.aux)
+crescent(115, map(scaleDegree, 0.5, 1.1, w(0.35), w(0.5)), map(scaleDegree, 0.5, 1.1, h(0.35), h(0.5)), map(scaleDegree, 0.5, 1.1, h(0.28), h(0.5)), p.aux)
 }
 // OVERLAY FUNCTIONS
 function fourPieceOverlay() {
@@ -1813,51 +1896,69 @@ function fourPieceOverlay() {
   const y_limits_random = [y_limits_1, y_limits_2]
   //const y_limits = y_limits_random[floor(rnd() * y_limits_random.length)];
   const x_l = w(0)
-  const x_m = rnd(w(0.25),w(0.5))
-  const x_l_m = (x_m - x_l)/2
+  const x_m = rnd(w(0.38),w(0.57))
+  const x_l_m = (x_m - x_l)/2 - w(.1)
   const x_r = w(1)
   //const x_r_m = (x_r - (x_r - x_m))/2 // for future use to align
   const y_l = rnd(h(0.1),h(0.3))
   const y_r = rnd(h(0.6),h(0.85))
-  const window_width = (x_m - x_l_m)/3
-  window_overlay(x_l_m, x_l_m + window_width, x_m, x_m - window_width, y_l, y_l+window_width, h(1), palette.base, w(0.015), -w(.008), 0)
-  rectangle_with_triangleCutout(x_m, x_r, y_r, h(0), palette.aux)
-  gradient_plate(x_l, x_l_m, h(0), x_m, h(1), y_l, palette.gradient, palette.gradient, palette.contrast)
+  const window_width = (x_m - x_l_m)/3.3
+  window_overlay(x_l_m, x_l_m + window_width, x_m, x_m - window_width, y_l, y_l+window_width, h(1), p.base, 0.6*sV, -0.3*sV, 0)
+  rectangle_with_triangleCutout(x_m, x_r, y_r, h(0), p.aux)
+  gradient_plate(x_l, x_l_m, h(0), x_m, h(1), y_l, p.gradient, p.gradient, p.contrast)
   push()
   pop()
-  gradient_flat(x_m, y_r, x_r-x_m, (h(1)-y_r)/2, palette.gradient, palette.gradient)
-  window_overlay(x_l_m, x_l_m + window_width, x_m, x_m - window_width, y_l, y_l+window_width, h(1), palette.light, w(0.025), -w(.01), 0) //maybe delete?
+  gradient_flat(x_m, y_r, x_r-x_m, (h(1)-y_r)/2, p.gradient, p.gradient)
+  window_overlay(x_l_m, x_l_m + window_width, x_m, x_m - window_width, y_l, y_l+window_width, h(1), p.light, 1.6*sV, -1.2*sV, 0) //maybe delete?
   pop()
   let s_p = [[x_l_m/2, h(1) - h(0.04)],[x_l_m/2, y_l/1.5],[x_m-x_l_m/2, y_l/1.5],[x_m +w(.02),y_r+h(.02)],[x_r -w(.02),y_r+h(.02)],[x_m+w(.02),h(.02)],[x_m+w(.02),y_r-h(.02)],[x_r-w(.02),h(.02)],[x_r-w(.02),y_r-h(.02)]]
   s_p.forEach(i => screw(i[0],i[1]))
 }
 function tulipCutOut() {
-  drawingContext.shadowOffsetX =  0;
-  drawingContext.shadowOffsetY = -w(0.003);
-  drawingContext.shadowBlur = w(0.016);
-  drawingContext.shadowColor = 'black';
+  ctx.shadowOffsetX =  0;
+  ctx.shadowOffsetY = -0.3*sV;;
+  ctx.shadowBlur = 0.5*sV;;
+  ctx.shadowColor = 'black';
   push()
   let shift_x = rnd(w(0.1), w(0.23))
   const a = rnd(-w(.15), w(.023))
-  meetingCircles(palette.light, shift_x, a, 75)
+  meetingCircles(p.light, shift_x, a, 75)
   blendMode(SCREEN)
-  meetingCircles(palette.light, shift_x, a, 165)
+  meetingCircles(p.light, shift_x, a, 165)
   pop()
 }
 function kelly_Bshape2() {
   push()
-  drawingContext.shadowOffsetX =  0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = w(.015);
-  drawingContext.shadowColor = 'black';
+  ctx.shadowOffsetX =  0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = 0.2*sV;
+  ctx.shadowColor = 'black';
+  noStroke()
+  let a = -w(.127)
+  bShape(p.aux,a,125)
+  blendMode(SCREEN)
+  bShape(p.aux,a,160)
+  pop()
+  let s_p = [[w(0.665) + a - w(0.03),h(.985)],[w(0.665) + a - w(0.03),h(.015)],[w(0.274) + a + w(0.03),h(.985)],[w(0.274) + a + w(0.03),h(0.015)],[w(0.192) + a,h(.985)],[w(0.192) + a,h(.015)]]
+  s_p.forEach(i => screw(i[0],i[1]))
+}
+function kellyB_alt() {//layered over perim 3 (saved image)
+  push()
+  scale(1.257)
+  translate(-w(.085),-h(.172))
+  ctx.shadowOffsetX =  0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = 0.2*sV;
+  ctx.shadowColor = 'black';
   noStroke()
   let a = rnd(-w(.08),w(.08))
-  bShape(palette.aux,a,125)
+  let b = 3*a
+  bShape(p.aux,a,b,125)
   blendMode(SCREEN)
-  bShape(palette.aux,a,85)
-  pop()
-  let s_p = [[w(0.882) + a - w(0.03),h(.985)],[w(0.914) + a - w(0.03),h(.015)],[w(0.353) + a + w(0.03),h(.985)],[w(0.353) + a + w(0.03),h(0.015)],[w(0.192) + a,h(.985)],[w(0.192) + a,h(.015)]]
+  bShape(p.aux,a,b,85)
+  let s_p = [[w(0.882) + a - w(0.015),h(.985)],[w(0.914) + a - w(0.03),h(.015)],[w(0.353) + a + w(0.03),h(.985)],[w(0.353) + a + w(0.03),h(0.015)],[w(0.25) + a,h(.985)],[w(0.25) + a,h(.015)]]
   s_p.forEach(i => screw(i[0],i[1]))
+  pop()
 }
 function windowAndSail() {
   push()
@@ -1868,41 +1969,45 @@ function windowAndSail() {
   const window_top = rnd(h(0.1),h(0.25))
   const bar_height = rnd(h(0.05),h(0.15))
   const sail_width = window_x_right + w(0.005)
-  window_overlay(window_x_left, window_x_left + window_width, window_x_right, window_x_right - window_width, window_top, window_top+window_width, h(1) - bar_height, palette.aux, w(0.015))
+  window_overlay(window_x_left, window_x_left + window_width, window_x_right, window_x_right - window_width, window_top, window_top+window_width, h(1) - bar_height, p.aux, w(0.015))
   noStroke()
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = w(0.01);
-  drawingContext.shadowColor = 'black';
-  let sail_color = palette.accent
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = 0.1*sV;
+  ctx.shadowColor = 'black';
+  let sail_color = p.accent
   let sail_bottom_split = sail_width+sail_width/4
   fill(sail_color[0],sail_color[1],sail_color[2],120)
   strokeWeight(w(.002))
   stroke(sail_color[0],sail_color[1],sail_color[2],60)
-  beginShape()
-  vertex(w(0.998),h(1)-bar_height-h(0.003))
-  vertex(sail_bottom_split,h(1)-bar_height-h(0.003))
-  vertex(sail_width,h(0.75))
-  vertex(sail_width,h(0.6))
-  vertex(w(0.97),h(0.1))
-  vertex(w(0.97),h(0.002))
-  vertex(w(0.998),h(0.002))
-  endShape(CLOSE)
-  drawingContext.shadowBlur = 0;
+  let jw = w(.97)-(w(.97)-sail_width)/2
+  let jy = (h(1)-bar_height)/2
+  let jpegs = [[jw*(1.18),jy*(1.1),w(.004),h(.007)],[jw*(1.06),jy*(1.14),w(.003),h(.005)],[jw*(1),jy*(1.16),w(.002),h(.004)],[jw*(1.13),jy*(1.15),w(.003),h(.007)],[jw*(1.1),jy*(1.24),w(.001),h(.003)],[jw*(1.17),jy*(1.11),w(.002),h(.005)],[jw*(1.12),jy*(1.05),w(.003),h(.008)],[jw*(1.14),jy*(1.02),w(.004),h(.01)],[jw*(1.1),jy*(0.96),w(.002),h(.005)],[jw*(1.18),jy*(0.91),w(.004),h(.005)],[jw*(1.18),jy*(0.98),w(.002),h(.003)]];
+  bS()
+  v(w(0.997),h(1)-bar_height-h(0.003))
+  v(w(0.997),h(0.003))
+  v(w(0.97),h(0.003))
+  v(w(0.97),h(0.1))
+  v(sail_width,h(0.6))
+  v(sail_width,h(0.75))
+  v(sail_bottom_split,h(1)-bar_height-h(0.003))
+  jpegs.forEach(i => jpegArt(i[0],i[1],i[2],i[3]))
+  eS(CLOSE)
+  ctx.shadowBlur = 0;
   let color_c1_sail = gradient_3;
-  let b1_sail = color(color_c1_sail[0], color_c1_sail[1], color_c1_sail[2], 10);
-  let b2_sail = color(255,255,255,185);
-  const gradient_mid_sail = rnd(sail_width,w(0.998))
-  let n_l = 650
-  strokeWeight((w(0.998)-sail_width)/n_l - w(.0005))
+  let b1_sail = color(color_c1_sail[0], color_c1_sail[1], color_c1_sail[2], 0);
+  let b2_sail = color(255,255,255,225);
+  const gradient_mid_sail = rnd(sail_width+w(.05),sail_width+sail_width/2)
+  let n_l = 1200
+  strokeWeight(0.4*sail_width/n_l)
   for (let i = 1; i < n_l; i++){
-    let x = map(i, 0, n_l, sail_width, w(0.998))
+    let x = map(i, 0, n_l, sail_width, w(0.997))
     if (x <= gradient_mid_sail){
         let inter = map(x, sail_width, gradient_mid_sail, 1, 0)
-        c = lerpColor(b1_sail, b2_sail, inter)
+        c = lerpColor(b2_sail, b1_sail, inter)
       }else{
         let inter2 = map(x, gradient_mid_sail, w(0.998), 1, 0)
-        c = lerpColor(b2_sail, b1_sail, inter2)
+        c = lerpColor(b1_sail, b2_sail, inter2)
       }
     if (x < w(0.97)){
         y1 = map(x,sail_width,w(0.97),h(0.6),h(0.1))
@@ -1912,21 +2017,21 @@ function windowAndSail() {
             y2 = h(1)-bar_height-h(0.003)
         }
     }else{
-        y1 = h(0.002)
+        y1 = h(0.003)
         y2 = h(1)-bar_height-h(0.003)
     }
     stroke(c)
     line(x,y1,x,y2)
   }
-  let bar_color = palette.secondary
+  let bar_color = p.secondary
   fill(bar_color[0],bar_color[1],bar_color[2],85)
-  drawingContext.shadowBlur = w(0.01);
-  beginShape()
-  vertex(w(0.002),h(1)-bar_height)
-  vertex(w(0.998),h(1)-bar_height)
-  vertex(w(0.998),h(0.998))
-  vertex(w(0.002),h(0.998))
-  endShape(CLOSE)
+  ctx.shadowBlur = 0.1*sV;
+  bS()
+  v(w(0.002),h(1)-bar_height)
+  v(w(0.998),h(1)-bar_height)
+  v(w(0.998),h(0.998))
+  v(w(0.002),h(0.998))
+  eS(CLOSE)
   colorMode(RGB, 255, 255, 255, 255);
   let color_c1 = gradient_1
   //let color_c2 = gradient_3
@@ -1934,7 +2039,7 @@ function windowAndSail() {
   let b2 = color(255,255,255,165)
   let gradient_mid = rnd(w(0.2),w(0.8))
   strokeCap(SQUARE)
-  drawingContext.shadowBlur = 0;
+  ctx.shadowBlur = 0;
   let bar_nl = 1000
   for (let i = 0; i < bar_nl; i++){
     let x = map(i, 0, bar_nl, w(0.002), w(0.998))
@@ -1958,52 +2063,50 @@ function windowAndSail() {
 function sails() {
   push()
   sailShape()
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = w(0.01);
-  drawingContext.shadowColor = 'black';
-  triRect(palette.contrast, 115)
-  triCut(palette.accent,165)
-  drawingContext.shadowOffsetX = -w(.01);
-  drawingContext.shadowOffsetY = w(.01);
-  drawingContext.shadowBlur = w(.025);
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = 0.1*sV;
+  ctx.shadowColor = 'black';
+  triRect(p.contrast, 115)
+  triCut(p.accent,165)
+  ctx.shadowOffsetX = -0.1*sV;
+  ctx.shadowOffsetY = 0.1*sV;
+  ctx.shadowBlur = 0.25*sV;
 
-  triCut(palette.accent,95)
+  triCut(p.accent,95)
   let s_p = [[w(.015),h(.015)],[w(.985),h(.015)],[w(.985),h(.985)],[w(0.015),h(0.985)],[w(0.485),h(0.985)],[w(0.485),h(0.015)],[w(0.71),h(0.985)],[w(0.52),h(0.62)],[w(0.52),h(0.78)],[w(.135),h(.135)],[w(.365),h(.135)],[w(.135),h(.865)],[w(.365),h(.865)],[w(.105),h(.255)],[w(.395),h(.255)]]
   s_p.forEach(i => screw(i[0],i[1]))
   pop()
 }
 function crescentAndRectangles() {
   push()
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = w(0.01);
-  drawingContext.shadowColor = 'black';
-  let crescentColor = palette.o
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = sV;
+  ctx.shadowColor = 'black';
+  let crescentColor = p.o
   noStroke()
   fill(crescentColor[0],crescentColor[1],crescentColor[2],190)
   crescentCutOut()
-  let rectanglesColor = palette.accent
-  fill(rectanglesColor[0],rectanglesColor[1],rectanglesColor[2],185)
-  twoRectangles()
+  twoRectangles(p.accent,125,165)
   blendMode(SCREEN)
   fill(crescentColor[0],crescentColor[1],crescentColor[2],35)
   crescentCutOut()
   pop()
 }
 function curveSilo() {
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = w(0.01);
-  drawingContext.shadowColor = 'black';
-  siloShapes(palette.aux, palette.o, palette.contrast, 165)
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = sV;
+  ctx.shadowColor = 'black';
+  siloShapes(p.aux, p.o, p.contrast, 165)
 }
 function swoop() {
-  drawingContext.shadowOffsetX = 0;
-  drawingContext.shadowOffsetY = 0;
-  drawingContext.shadowBlur = w(0.01);
-  drawingContext.shadowColor = 'black';
-  bigSwoop(palette.o, palette.contrast) 
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = sV;
+  ctx.shadowColor = 'black';
+  bigSwoop(p.o, p.contrast) 
 }
 // COMBO FUNCTIONS
 function chooseLower(options, decPair) {
@@ -2023,13 +2126,13 @@ const styles = {
     id: "tulip",
     upper: [tulipCutOut],
     lower: [rug_layout,perspective_layout,triangle_with_lines,kellyLayout,basicNewman,threeSquares,basicMoholy,squaresSail,trident],
-    perimeter: [perimeter_general, perimeter_1, perimeter_2, perimeter_3]
+    perimeter: [perimeter_general, perimeter_1, perimeter_2, perimeter_3, perimeter_4]
   },
   combine: {
     id: "combine",
     upper: [fourPieceOverlay, windowAndSail, kelly_Bshape2, crescentAndRectangles, curveSilo, sails, swoop],
     lower: [rug_layout,triangle_with_lines,kellyLayout,basicNewman,threeSquares,basicMoholy,squaresSail,trident],
-    perimeter: [perimeter_general, perimeter_1, perimeter_2, perimeter_3]
+    perimeter: [perimeter_general, perimeter_1, perimeter_2, perimeter_3, perimeter_4]
   }
 }
 
@@ -2052,8 +2155,11 @@ function chooseResult() {
       pop();
     }
     if(perimeter === perimeter_3){
-      scale(0.7)
+      scale(0.699)
       translate(w(0.215),h(0.215))
+    }else if(perimeter === perimeter_4){
+      scale(0.82)
+      translate(w(0.11),h(0.11))
     }else{
       scale(0.95)
       translate(w(0.026),h(0.026))
