@@ -1,3 +1,4 @@
+tokenData.hash = "0x4bfc060b8ec9d074f9131140762cbc64bc0b18ab680c9679a640de2841eeb3b0"
 let bV;
 let v;
 let ctx;
@@ -129,7 +130,7 @@ const palettes = {
         o: [255,92,148],
         t: [2,7,18]
     },
-    col_burn: {
+    nautical: {
       base: [14,32,52],
       secondary: [203,203,203],
       primary: [44,81,112],
@@ -232,6 +233,19 @@ const palettes = {
       perim: [78,153,81],
       o: [242,202,199],
       t: [225,126,172]
+    },
+    render: {
+      base: [242,226,210],
+      secondary: [201,170,204],
+      primary: [247,237,88],
+      accent: [213,132,177],
+      dark: [82,87,161],
+      light: [246,245,246],
+      contrast: [250,244,165],
+      aux: [174,205,84],
+      perim: [221,81,64],
+      o: [19,174,209],
+      t: [207,232,233]
     }
 }
 const blPal = {
@@ -535,6 +549,37 @@ function halftone_dots() {
     xoff += inc
   }
 }
+function paper() {
+  push()
+  xoff = 0
+  let inc = .35
+  let num = 100
+  noStroke()
+  for (let i = 0; i < num; i++){
+    y = map(i, 0, num, 0, h(1))
+    for (let j = 0; j < 2*num; j++){
+      x = map(j, 0, 2*num, 0, w(1))
+      ny = y + 60*noise(xoff)
+      xoff += inc
+      fill(p.t[0],p.t[1],p.t[2])
+      ellipse(x, ny, w(.0005))
+    }
+  }
+  stroke(p.t[0],p.t[1],p.t[2])
+  for (let i = 0; i < 15; i++){
+    let s = map(i, 0, 15, 0, w(.5))
+    bS()
+    for (var j = 0; j < 30; i++) {
+      let vx = w(.5)+s*Math.cos(2 * PI * i / 30)
+      let vy = w(.5)+s*Math.sin(2 * PI * i / 30)
+      if(0 < vx > w(1) && 0 < vy > h(1)){
+        v(vx, vy)
+    }
+    eS()
+    }
+  }
+  pop()
+}
 function crescent(a,x,y,r,pal) {
   push()
   stroke(0);
@@ -798,7 +843,7 @@ function perimeter_4() {
 }
 // CHOOSER FUNCTIONS
 function chooseTexture() {
-  const textures = [dots_texture, checkerboard, halftone_dots]
+  const textures = [dots_texture, checkerboard, halftone_dots, paper]
   textures[floor(map(decPairs[1],0,255,0,textures.length - 0.001))]()
 }
 function chooseKellyOverlay() {
@@ -1038,6 +1083,7 @@ function window_overlay(x_left_outside, x_left_inside, x_right_outside, x_right_
   let b2 = color(255,255,255,215)
   let gradient_mid = rnd(x_left_outside+w(.12),x_right_outside-w(.12))
   strokeCap(SQUARE)
+  ctx.shadowOffsetY = 0;
   ctx.shadowOffsetX = 0;
   ctx.shadowBlur = 0;
   let n_l = 600
@@ -1079,7 +1125,7 @@ function rectangle_with_triangleCutout(left, right, bottom, top, pal) {
   strokeJoin(ROUND)
   strokeWeight(w(0.0015))
   let tri_mid = right - (right - left)/2
-  let jw = right - (right-tri_mid)/2
+  let jw = right - (right-tri_mid)/1.8
   let jy = bottom/2
   let jpegs = [[jw,jy*(.08),w(.003),h(.005)],[jw*(1.02),jy*(.1),w(.004),h(.007)],[jw*(.98),jy*(.13),w(.003),h(.005)],[jw*(.95),jy*(.16),w(.002),h(.004)],[jw*(1.03),jy*(.18),w(.003),h(.007)],[jw*(1.06),jy*(.109),w(.001),h(.003)],[jw*(1.09),jy*(.21),w(.002),h(.005)],[jw*(1.11),jy*(.23),w(.003),h(.004)],[jw*(1.08),jy*(.26),w(.003),h(.006)],[jw*(1.12),jy*(.06),w(.005),h(.008)],[jw*(1.08),jy*(.075),w(.003),h(.004)],[jw*(1.1),jy*(.085),w(.005),h(.006)],[jw*(1.1),jy*(.125),w(.003),h(.005)],[jw*(1.06),jy*(.29),w(.004),h(.006)],[jw*(0.94),jy*(.06),w(.004),h(.006)]]
   bS()
@@ -1422,7 +1468,7 @@ function sailShape() {
 }
 function bigSwoop(pal, pal2) {
   noStroke()
-  fill(pal[0],pal[1],pal[2], 155)
+  fill(pal[0],pal[1],pal[2], 165)
   push()
   rectMode(CORNER)
   let jw = w(.56)
@@ -1437,7 +1483,7 @@ function bigSwoop(pal, pal2) {
   jpegs.forEach(i => jpegArt(i[0],i[1],i[2],i[3]))
   eS(CLOSE)
   pop()
-  fill(pal2[0],pal2[1],pal2[2], 155)
+  fill(pal2[0],pal2[1],pal2[2], 190)
   bS();
   v(w(.003),h(0.7312));
   bV(w(0),h(0.7312),w(0.2082),h(1.11),w(0.6666),h(0.96078));
@@ -1456,13 +1502,13 @@ function bigSwoop(pal, pal2) {
   eS();
   angleMode(DEGREES)
   let as = rnd(w(0.43),w(0.72))
-  stroke(pal[0],pal[1],pal[2], 155)
+  stroke(pal[0],pal[1],pal[2], 165)
   strokeWeight(w(.06))
   strokeCap(PROJECT)
   noFill()
   arc(w(0.65),h(0.45),0.95*as,0.95*as,165,270,OPEN)
   noStroke()
-  fill(pal2[0],pal2[1],pal2[2], 155)
+  fill(pal2[0],pal2[1],pal2[2], 190)
   arc(w(0.65),h(0.45),as,as,90,270,OPEN)
   let s_p = [[w(.784),h(.013)],[w(.784),h(.87)],[w(.04),h(.755)],[w(0.65) - 0.05*as,h(0.45) + 0.45*as],[w(0.65) - 0.05*as,h(0.45) - 0.45*as],[w(0.65) - 0.465*as,h(0.42)],[w(0.65) - 0.465*as,h(0.48)],[w(.78),h(.987)],[w(.987),h(.5)]]
   s_p.forEach(i => screw(i[0],i[1]))
@@ -1504,10 +1550,12 @@ function siloShapes(pal1,pal2,pal3,alpha) {
   noStroke()
 
   silo_tr()
+  let jw = w(.15)
+  let jy = h(.15)
+  let jpegs = [[jw,jy,w(.003),h(.005)],[jw*(1.12),jy,w(.004),h(.007)],[jw*(.93),jy*(1.08),w(.003),h(.005)],[jw*(.95),jy*(.92),w(.002),h(.004)],[jw*(1.1),jy*(1.18),w(.003),h(.007)],[jw*(1.13),jy*(1.25),w(.001),h(.003)],[jw*(.88),jy*(1.32),w(.002),h(.005)],[jw*(.82),jy*(.82),w(.003),h(.008)],[jw*(.75),jy*(.95),w(.003),h(.004)],,[jw*(.48),jy*(.43),w(.002),h(.004)],[jw*(.54),jy*(.65),w(.006),h(.01)],[jw*(.36),jy,w(.004),h(.006)],[jw*(.27),jy*(.5),w(.003),h(.005)],[jw*(1.34),jy*(1.5),w(.003),h(.007)]]
 
   fill(pal2[0],pal2[1],pal2[2],alpha)
   //stroke(pal2[0],pal2[1],pal2[2],alpha/2)
-
   bS();
   v(w(.003),h(.003));
   v(w(.003),h(.997));
@@ -1523,6 +1571,7 @@ function siloShapes(pal1,pal2,pal3,alpha) {
   v(w(.78666),h(.18363));
   v(w(.91974),h(.18363));
   v(w(.91974),h(.003));
+  jpegs.forEach(i => jpegArt(i[0],i[1],i[2],i[3]))
   eS(CLOSE);
 
   fill(pal3[0],pal3[1],pal3[2],alpha/2)
@@ -1541,7 +1590,7 @@ function siloShapes(pal1,pal2,pal3,alpha) {
 
   ctx.shadowOffsetX = -0.7*sV;
   ctx.shadowOffsetY = 0.7*sV;
-  ctx.shadowBlur = 2*sV;
+  ctx.shadowBlur = 2.2*sV;
   fill(pal1[0],pal1[1],pal1[2],alpha/2)
   noStroke()
   silo_tr()
@@ -1725,7 +1774,6 @@ function basicMoholy() {
   let arc_y = arc_x
   let arc_size = map(arc_x,w(0.3),w(0.5),w(0.37),w(0.76))
   let second_angle_offset = angle_begin/3
-  let wedge_angle_offset = rnd(50,135)
   noFill()
   let arc_color = p.light
   let arc_color_2 = p.accent
@@ -1742,7 +1790,7 @@ function basicMoholy() {
   ctx.shadowColor = 'grey';
   strokeWeight(arc_x/20)
   stroke(arc_color_2[0], arc_color_2[1], arc_color_2[2], 235)
-  arc(arc_x, arc_y, 1.047*arc_size, 1.047*arc_size, angle_begin-second_angle_offset, angle_end-2*second_angle_offset);
+  arc(arc_x, arc_y, 1.047*arc_size, 1.047*arc_size, angle_begin-second_angle_offset, angle_end-second_angle_offset);
   ctx.shadowBlur = map(arc_size,w(0.32),w(0.8),0.05*sV,0.25*sV)
   strokeWeight(arc_x/40)
   stroke(arc_color[0], arc_color[1], arc_color[2], 235)
@@ -1999,9 +2047,10 @@ function blackTul() {
 }
 function kelly_Bshape2() {
   push()
+  twoRectangles(p.o,150,180)
   ctx.shadowOffsetX =  0;
   ctx.shadowOffsetY = 0;
-  ctx.shadowBlur = sV;
+  ctx.shadowBlur = 1.5*sV;
   ctx.shadowColor = 'black';
   noStroke()
   let a = -w(.127)
@@ -2039,7 +2088,7 @@ function windowAndSail() {
   const window_top = rnd(h(0.1),h(0.25))
   const bar_height = rnd(h(0.05),h(0.15))
   const sail_width = window_x_right + w(0.005)
-  window_overlay(window_x_left, window_x_left + window_width, window_x_right, window_x_right - window_width, window_top, window_top+window_width, h(1) - bar_height, p.aux, w(0.015))
+  window_overlay(window_x_left, window_x_left + window_width, window_x_right, window_x_right - window_width, window_top, window_top+window_width, h(1) - bar_height, p.aux, w(0.015), -w(.005), -w(.002))
   noStroke()
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
@@ -2067,16 +2116,16 @@ function windowAndSail() {
   let color_c1_sail = gradient_3;
   let b1_sail = color(color_c1_sail[0], color_c1_sail[1], color_c1_sail[2], 0);
   let b2_sail = color(255,255,255,225);
-  const gradient_mid_sail = rnd(sail_width+w(.15),sail_width+sail_width/2)
+  const gradient_mid_sail = rnd(sail_width+w(.15),w(.85))
   let n_l = 1200
-  strokeWeight(0.4*sail_width/n_l)
+  strokeWeight(0.8*sail_width/n_l)
   for (let i = 1; i < n_l; i++){
     let x = map(i, 0, n_l, sail_width, w(0.997))
     if (x <= gradient_mid_sail){
-        let inter = map(x, sail_width, gradient_mid_sail, 1, 0)
+        let inter = map(x, sail_width, gradient_mid_sail, 0, 1)
         c = lerpColor(b2_sail, b1_sail, inter)
       }else{
-        let inter2 = map(x, gradient_mid_sail, w(0.998), 1, 0)
+        let inter2 = map(x, gradient_mid_sail, w(0.998), 0, 1)
         c = lerpColor(b1_sail, b2_sail, inter2)
       }
     if (x < w(0.97)){
@@ -2165,14 +2214,14 @@ function crescentAndRectangles() {
 function curveSilo() {
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
-  ctx.shadowBlur = sV;
+  ctx.shadowBlur = 1.3*sV;
   ctx.shadowColor = 'black';
   siloShapes(p.aux, p.o, p.contrast, 165)
 }
 function swoop() {
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
-  ctx.shadowBlur = sV;
+  ctx.shadowBlur = 1.5*sV;
   ctx.shadowColor = 'black';
   bigSwoop(p.o, p.contrast) 
 }
@@ -2218,6 +2267,39 @@ function trident_over() {
   let s_p = [[w(.066),h(.7)],[w(.992),-h(.013)],[w(.98),h(.98)],[w(0.02),h(0.98)],[w(.49),h(.95)]]
   s_p.forEach(i => screw(i[0],i[1]))
 }
+function celest() {
+  push()
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.shadowBlur = 2*sV;
+  ctx.shadowColor = 'black';
+  const values = Object.values(p)
+  let num_c = rnd(5,10)
+  let prop = values[floor(rnd() * values.length)]
+  noStroke()
+  fill(prop[0], prop[1], prop[2], 165)
+  ellipse(w(.5),h(.5),w(.15))
+  angleMode(DEGREES)
+  for (let i = 0; i < num_c; i++){
+    let prop = values[floor(rnd() * values.length)]
+    let s = map(i, 0, num_c, w(.25), w(.975))
+    let a1 = map(i, 0 , num_c, 30, 330)
+    let adiff = map(i, 0 , num_c, 60, 270)
+    let a_rand = rnd(-30,30)
+    noFill()
+    stroke(prop[0], prop[1], prop[2], map(i, 0, num_c, 215, 145))
+    strokeWeight(w(.3)/num_c)
+    strokeCap(ROUND)
+    arc(w(.5),h(.5),s,s,a1+a_rand,a1+adiff+a_rand)
+    push()
+    translate(w(.5),h(.5))
+    screw(.5*s*cos(a1+a_rand),.5*s*sin(a1+a_rand))
+    screw(.5*s*cos(a1+adiff+a_rand),.5*s*sin(a1+adiff+a_rand))
+    pop()
+  }
+  screw(w(.5),h(.5))
+  pop()
+}
 // COMBO FUNCTIONS
 const screwCols = {
   silver: [233, 233, 233],
@@ -2231,7 +2313,7 @@ function chooseScrew() {
   if (screwPercent < .1) {
     scrC = screwCols.gold;
   }
-  if (screwPercent > .15 && screwPercent < .4) {
+  if (screwPercent > .1 && screwPercent < .3) {
     scrC = screwCols.black;
   }
   return scrC;
@@ -2241,8 +2323,56 @@ function chooseLower(options, decPair) {
   return options[floor(map(decPairs[decPair],0,255,0,options.length - 0.001))]
 }
 
+function chooseLower_Combine() {
+  const cL_Combine_percent = map(decPairs[4],0,255,0,1);
+    if (cL_Combine_percent < .17) {
+      lo = basicNewman
+    }else if (cL_Combine_percent < .32){
+      lo = basicMoholy
+    }else if (cL_Combine_percent < .47){
+      lo = kellyLayout
+    }else if (cL_Combine_percent < .6){
+      lo = trident
+    }else if (cL_Combine_percent < .72){
+      lo = squaresSail
+    }else if (cL_Combine_percent < .82){
+      lo = triangle_with_lines
+    }else if (cL_Combine_percent < .9){
+      lo = rays
+    }else if (cL_Combine_percent < .95){
+      lo = threeSquares
+    }else{
+      lo = rug_layout
+    }
+    console.log("lower layer percentage = " + cL_Combine_percent)
+    return lo
+}
+
 function chooseUpper(options, decPair) {
   return options[floor(map(decPairs[decPair],0,255,0,options.length - 0.001))]
+}
+
+function chooseUpper_Combine() {
+  const cU_Combine_percent = map(decPairs[11],0,255,0,1);
+    if (cU_Combine_percent < .2) {
+      up = crescentAndRectangles
+    }else if (cU_Combine_percent < .4){
+      up = swoop
+    }else if (cU_Combine_percent < .6){
+      up = sails
+    }else if (cU_Combine_percent < .75){
+      up = celest
+    }else if (cU_Combine_percent < .86){
+      up = kelly_Bshape2
+    }else if (cU_Combine_percent < .94){
+      up = fourPieceOverlay
+    }else if (cU_Combine_percent < .98){
+      up = sails
+    }else{
+      up = curveSilo
+    }
+    console.log("upper layer percentage = " + cU_Combine_percent)
+    return up
 }
 
 function choosePerimeter(options, decPair) {
@@ -2258,8 +2388,8 @@ const styles = {
   },
   combine: {
     id: "combine",
-    upper: [fourPieceOverlay, windowAndSail, kelly_Bshape2, crescentAndRectangles, curveSilo, sails, swoop],
-    lower: [rug_layout,triangle_with_lines,kellyLayout,basicNewman,threeSquares,basicMoholy,squaresSail,trident,rays],
+    upper: [fourPieceOverlay, windowAndSail, kelly_Bshape2, crescentAndRectangles, curveSilo, sails, swoop, celest],
+    lower: [chooseLower_Combine],
     perimeter: [perimeter_general, perimeter_1, perimeter_2, perimeter_3, perimeter_4]
   },
   blackTul: {
@@ -2267,30 +2397,26 @@ const styles = {
     upper: [tulipCutOut],
     lower: [rug_layout, perspective_layout, triangle_with_lines],
     perimeter: [perimeter_1, perimeter_4]
-  },
-  trident: {
-    id: "trident",
-    upper: [trident_over],
-    lower: [rug_layout,triangle_with_lines,kellyLayout,basicNewman,threeSquares,basicMoholy,squaresSail,trident,rays],
-    perimeter: [perimeter_4]
   }
 }
 
 function chooseResult() {
     const resultPercent = map(decPairs[7],0,255,0,1);
     let style = styles.combine;
+    let lower = chooseLower_Combine();
+    let upper = chooseUpper_Combine()
     if (resultPercent < .03) {
       style = styles.blackTul;
+      lower = chooseLower(style.lower, 4);
+      upper = chooseUpper(style.upper, 6);
     }
     if (resultPercent > .03 && resultPercent < .09) {
       style = styles.tulip;
+      lower = chooseLower(style.lower, 4);
+      upper = chooseUpper(style.upper, 6);
     }
-    if (resultPercent > .09 && resultPercent < .2) {
-      style = styles.trident;
-    }
-    const lower = chooseLower(style.lower, 4);
     const perimeter = choosePerimeter(style.perimeter, 3);
-    const upper = chooseUpper(style.upper, 6);
+    //const upper = chooseUpper(style.upper, 6);
     scr = chooseScrew()
 
     if(styles.blackTul.id === style.id) {

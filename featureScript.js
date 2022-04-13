@@ -24,21 +24,22 @@ function calculateFeatures(tokenData) {
   };
 
   const palettes = {
-    radiance: "radiance",
-    screen: "screen",
-    threshold: "threshold",
-    darken: "darken",
-    chroma: "chroma",
-    hard_mix: "hard mix",
-    lin_burn: "linear burn",
-    col_burn: "color burn",
-    pinlight: "pinlight",
-    soft_light: "soft light",
-    range: "range",
-    vibrance: "vibrance",
-    accents_A: "accents A",
-    accents_B: "accents B",
-    rays: "rays"
+    radiance: "Radiance",
+    screen: "Screen",
+    threshold: "Threshold",
+    darken: "Darken",
+    chroma: "Chroma",
+    hard_mix: "Hard Mix",
+    lin_burn: "Linear Burn",
+    nautical: "Nautical",
+    pinlight: "Pinlight",
+    soft_light: "Soft Light",
+    range: "Range",
+    vibrance: "Vibrance",
+    accents_A: "Highlight",
+    accents_B: "Color Burn",
+    rays: "Rays",
+    render: "Render"
 }
 
   const randomPalette = function (palettes) {
@@ -71,8 +72,53 @@ function calculateFeatures(tokenData) {
     return options[Math.floor(map(decPairs[decPair],0,255,0,options.length - 0.001))]
   }
 
+  function chooseLower_Combine() {
+    const cL_Combine_percent = map(decPairs[4],0,255,0,1);
+      if (cL_Combine_percent < .17) {
+        lo = "Color Field"
+      }else if (cL_Combine_percent < .32){
+        lo = "Bauhaus"
+      }else if (cL_Combine_percent < .47){
+        lo = "Contour"
+      }else if (cL_Combine_percent < .6){
+        lo = "Trident"
+      }else if (cL_Combine_percent < .72){
+        lo = "Channels"
+      }else if (cL_Combine_percent < .82){
+        lo = "Newman's Triangle"
+      }else if (cL_Combine_percent < .9){
+        lo = "Rays"
+      }else if (cL_Combine_percent < .95){
+        lo = "Levels"
+      }else{
+        lo = "Skew"
+      }
+      return lo
+  }
   function chooseUpper(options, decPair) {
     return options[Math.floor(map(decPairs[decPair],0,255,0,options.length - 0.001))]
+  }
+
+  function chooseUpper_Combine() {
+    const cU_Combine_percent = map(decPairs[11],0,255,0,1);
+      if (cU_Combine_percent < .2) {
+        up = "Glyphs"
+      }else if (cU_Combine_percent < .4){
+        up = "Lens Flare"
+      }else if (cU_Combine_percent < .6){
+        up = "Sails"
+      }else if (cU_Combine_percent < .75){
+        up = "Curves"
+      }else if (cU_Combine_percent < .86){
+        up = "Panorama"
+      }else if (cU_Combine_percent < .94){
+        up = "Arrowhead"
+      }else if (cU_Combine_percent < .98){
+        up = "Bisect"
+      }else{
+        up = "Celestials"
+      }
+      return up
   }
 
   function choosePerimeter(options, decPair) {
@@ -82,17 +128,17 @@ function calculateFeatures(tokenData) {
   const styles = {
     tulip: {
       upper: ["tulip"],
-      lower: ["rug", "perspective", "triangle with lines", "kelly layout", "basic newman", "three squares", "moholy", "square sail", "trident"],
+      lower: ["Skew", "perspective", "Newman's Triangle", "Contour", "Color Field", "Levels", "Bauhaus", "Channels", "Trident", "Rays"],
       perimeter: ["perimeter_1", "perimeter_4"]
     },
     combine: {
-      upper: ["fourPieceOverlay", "windowAndSail", "kelly_Bshape2", "crescentAndRectangles", "curveSilo", "sails", "swoop"],
-      lower: ["rug_layout", "triangle_with_lines", "kellyLayout", "basicNewman", "threeSquares", "basicMoholy", "squaresSail", "trident"],
+      upper: ["fourPieceOverlay", "windowAndSail", "kelly_Bshape2", "crescentAndRectangles", "curveSilo", "sails", "swoop", "celest"],
+      lower: ["Skew", "Newman's Triangle", "Contour", "Color Field", "Levels", "Bauhaus", "Channels", "Rays", "Trident"],
       perimeter: ["perimeter_basic", "perimeter_1", "perimeter_2", "perimeter_3", "perimeter_4"]
     },
     blackTul: {
       upper: ["tulipCutOut"],
-      lower: ["rug_layout", "perspective_layout", "triangle_with_lines"],
+      lower: ["Skew", "perspective_layout", "Newman's Triangle"],
       perimeter: ["perimeter_1", "perimeter_4"]
     }
   }
@@ -100,25 +146,31 @@ function calculateFeatures(tokenData) {
   function chooseResult() {
     const resultPercent = map(decPairs[7],0,255,0,1);
     let style = styles.combine;
+    let lower = chooseLower_Combine();
+    let upper = chooseUpper_Combine()
     p = randomPalette(palettes)
     if (resultPercent < .03) {
-      style = styles.blackTul;
       p = "blPal"
+      style = styles.blackTul;
+      lower = chooseLower(style.lower, 4);
+      upper = chooseUpper(style.upper, 6);
     }
     if (resultPercent > .03 && resultPercent < .09) {
       style = styles.tulip;
+      lower = chooseLower(style.lower, 4);
+      upper = chooseUpper(style.upper, 6);
     }
-    const lower = chooseLower(style.lower, 4);
     const perimeter = choosePerimeter(style.perimeter, 3);
-    const upper = chooseUpper(style.upper, 6);
+    //const upper = chooseUpper(style.upper, 6);
     scr = chooseScrew()
+
     return {lower, perimeter, upper, p};
   }
 
   const {lower, perimeter, upper} = chooseResult();
 
   function chooseTexture() {
-    const textures = ["dots", "checkerboard", "halftone dots"]
+    const textures = ["dots", "checkerboard", "halftone dots", "paper"]
     return textures[Math.floor(map(decPairs[1],0,255,0,textures.length - 0.001))]
   }
 
